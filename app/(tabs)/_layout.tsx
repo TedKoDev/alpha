@@ -12,7 +12,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Tab One',
+          title: '',
           tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
           headerRight: () => (
             <Link href="/modal" asChild>
@@ -22,9 +22,24 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="two"
+        name="feed"
         options={{
-          title: 'Tab Two',
+          title: 'Feed',
+          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="ad"
+        options={{
+          title: 'AD',
+          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+        }}
+      />
+
+      <Tabs.Screen
+        name="mypage"
+        options={{
+          title: 'My Page',
           tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
         }}
       />
