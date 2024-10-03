@@ -1,33 +1,53 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Stack, useRouter } from 'expo-router';
 import { useAuthStore } from '../store/authStore';
-import { View, ActivityIndicator } from 'react-native';
+import { View, ActivityIndicator, Animated, Image } from 'react-native';
 import '../global.css';
 
 export default function RootLayout() {
   const { isAuthenticated, checkAuth } = useAuthStore();
-  console.log('RootLayout isAuthenticated', isAuthenticated);
-  console.log('RootLayout checkAuth', checkAuth);
   const router = useRouter();
+  const [logoAnim] = useState(new Animated.Value(0)); // 로고 애니메이션 초기 크기
+  const [loading, setLoading] = useState(true); // 로딩 상태
 
   useEffect(() => {
     const checkAuthentication = async () => {
       await checkAuth(); // 인증 상태 확인
-      if (isAuthenticated === false) {
-        console.log('Not authenticated');
-
-        // 인증되지 않았을 경우 (auth)/login 페이지로 이동
-        router.replace('/login'); // /auth/login이 아니라 /login으로
-      }
+      setLoading(false); // 인증 상태 확인 후 로딩 종료
     };
 
     checkAuthentication();
-  }, [isAuthenticated]);
 
-  if (isAuthenticated === null) {
+    // 로고 애니메이션 설정
+    Animated.timing(logoAnim, {
+      toValue: 1,
+      duration: 1000,
+      useNativeDriver: true,
+    }).start();
+  }, []);
+
+  // 인증되지 않았을 경우 로그인 페이지로 이동
+  useEffect(() => {
+    if (!loading && isAuthenticated === false) {
+      console.log('Not authenticated');
+      router.replace('/login'); // /auth/login이 아니라 /login으로
+    }
+  }, [isAuthenticated, loading]);
+
+  if (loading || isAuthenticated === null) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#0000ff" />
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: '#ffffff',
+        }}>
+        {/* 로고 애니메이션 */}
+        <Animated.Image
+          source={require('../assets/icon.png')} // 로고 이미지
+          style={{ width: 150, height: 150, transform: [{ scale: logoAnim }] }}
+        />
       </View>
     );
   }

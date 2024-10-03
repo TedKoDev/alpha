@@ -16,6 +16,11 @@
 
       "tsconfigPaths": true
     },
+    "splash": {
+      "image": "./assets/icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
 
     "orientation": "portrait",
     "icon": "./assets/icon.png",
