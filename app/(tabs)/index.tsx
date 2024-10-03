@@ -1,22 +1,25 @@
 import { Stack } from 'expo-router';
-import { FlatList, View } from 'react-native';
+import { View } from 'react-native';
 import React from 'react';
-import events from 'assets/events.json'; // JSON 데이터 import
-import EventListingItem from '~/components/EventListingItem';
+import CustomCarousel from '~/components/customCarousel';
+import maincarousel from 'assets/dummy/maincarousel.json';
+import MainMenu from '~/components/maincategory/mainmenu';
 
 export default function Events() {
   return (
-    <>
+    <View className="bg-white">
+      {/* 전체 화면을 차지 */}
       {/* 스택 타이틀 설정 */}
-      <Stack.Screen options={{ title: 'Events' }} />
+      <Stack.Screen options={{ title: 'HOME' }} />
+      {/* 캐러셀 삽입 */}
+      <View>
+        {/* 여기에 패딩을 적용 */}
+        <CustomCarousel items={maincarousel} />
+      </View>
 
-      {/* 이벤트 리스트 렌더링 */}
-      <FlatList
-        data={events}
-        className="bg-white"
-        renderItem={({ item }) => <EventListingItem event={item} />}
-        keyExtractor={(item) => item.id}
-      />
-    </>
+      <View className="flex-row justify-around">
+        <MainMenu />
+      </View>
+    </View>
   );
 }

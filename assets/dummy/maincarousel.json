@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1,
+    "uri": "https://picsum.photos/360/200",
+    "title": "First Image",
+    "link": "https://example.com/page1"
+  },
+  {
+    "id": 2,
+    "uri": "https://picsum.photos/360/200",
+    "title": "Second Image",
+    "link": "https://example.com/page2"
+  },
+  {
+    "id": 3,
+    "uri": "https://picsum.photos/360/200",
+    "title": "Third Image",
+    "link": "https://example.com/page3"
+  }
+]

@@ -1,22 +1,22 @@
 import { Stack } from 'expo-router';
-import { StyleSheet, View } from 'react-native';
+import { FlatList, StyleSheet, View } from 'react-native';
+import EventListingItem from '~/components/EventListingItem';
 
+import events from 'assets/events.json'; // JSON 데이터 import
 import { ScreenContent } from '~/components/ScreenContent';
+import React from 'react';
 
 export default function Home() {
   return (
     <>
       <Stack.Screen options={{ title: 'Feed' }} />
-      <View style={styles.container}>
-        <ScreenContent path="app/(tabs)/feed.tsx" title="Feed" />
-      </View>
+      {/* 이벤트 리스트 렌더링 */}
+      <FlatList
+        data={events}
+        className="bg-white"
+        renderItem={({ item }) => <EventListingItem event={item} />}
+        keyExtractor={(item) => item.id}
+      />
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 24,
-  },
-});

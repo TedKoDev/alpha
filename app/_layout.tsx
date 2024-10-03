@@ -6,12 +6,16 @@ import '../global.css';
 
 export default function RootLayout() {
   const { isAuthenticated, checkAuth } = useAuthStore();
+  console.log('RootLayout isAuthenticated', isAuthenticated);
+  console.log('RootLayout checkAuth', checkAuth);
   const router = useRouter();
 
   useEffect(() => {
     const checkAuthentication = async () => {
       await checkAuth(); // 인증 상태 확인
       if (isAuthenticated === false) {
+        console.log('Not authenticated');
+
         // 인증되지 않았을 경우 (auth)/login 페이지로 이동
         router.replace('/login'); // /auth/login이 아니라 /login으로
       }

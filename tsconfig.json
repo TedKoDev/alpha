@@ -2,11 +2,20 @@
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
-
     "baseUrl": ".",
     "paths": {
-      "~/*": ["*"]
-    }
+      "~/*": [
+        "*"
+      ]
+    },
+    "jsx": "react-native", // JSX 구문을 지원하도록 설정
+    "types": ["expo-router"]
   },
-  "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"]
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts",
+    "nativewind-env.d.ts"
+  ]
 }

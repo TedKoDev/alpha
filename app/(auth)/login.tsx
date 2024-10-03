@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, TextInput, Pressable, Text, StyleSheet } from 'react-native';
 import { useAuthStore } from '~/store/authStore';
-import { Stack } from 'expo-router';
-import { Video, ResizeMode } from 'expo-av'; // ResizeMode import 추가
+import { Stack, useRouter } from 'expo-router'; // 추가
+import { Video, ResizeMode } from 'expo-av';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { login } = useAuthStore(); // Zustand의 login 함수 사용
+  const { login, isAuthenticated } = useAuthStore(); // Zustand의 login, isAuthenticated 함수 사용
+  const router = useRouter();
 
   const handleLogin = () => {
     if (email && password) {
@@ -17,25 +18,28 @@ export default function LoginScreen() {
     }
   };
 
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.replace('/'); // 인증되었을 경우 (tabs) 페이지로 이동
+    }
+  }, [isAuthenticated]); // 로그인 상태 변경 시 감시
+
   return (
     <>
-      {/* 헤더를 숨김 */}
       <Stack.Screen options={{ headerShown: false }} />
 
-      {/* 배경 동영상 */}
       <View style={styles.container}>
         <Video
-          source={require('../../assets/background.mp4')} // 배경 동영상 경로
+          source={require('../../assets/background.mp4')}
           rate={1.0}
           volume={1.0}
           isMuted={true}
-          resizeMode={ResizeMode.COVER} // ResizeMode.COVER 사용
+          resizeMode={ResizeMode.COVER}
           shouldPlay
           isLooping
-          style={StyleSheet.absoluteFill} // 전체 화면을 덮도록 설정
+          style={StyleSheet.absoluteFill}
         />
 
-        {/* 로그인 폼 */}
         <View style={styles.overlay}>
           <Text style={styles.title}>Welcome</Text>
 
@@ -59,15 +63,6 @@ export default function LoginScreen() {
           <Pressable style={styles.loginButton} onPress={handleLogin}>
             <Text style={styles.loginButtonText}>Login</Text>
           </Pressable>
-
-          <Pressable
-            style={styles.googleButton}
-            onPress={() => {
-              console.log('Google login');
-              /* Google 로그인 로직 */
-            }}>
-            <Text style={styles.googleButtonText}>Login with Google</Text>
-          </Pressable>
         </View>
       </View>
     </>
@@ -83,7 +78,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)', // 반투명 배경
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
   },
   title: {
     fontSize: 32,
@@ -107,17 +102,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   loginButtonText: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  googleButton: {
-    backgroundColor: '#DB4437',
-    borderRadius: 5,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-  },
-  googleButtonText: {
     color: 'white',
     fontSize: 18,
     fontWeight: 'bold',
