@@ -77,6 +77,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+
     padding: 20,
     backgroundColor: 'rgba(0, 0, 0, 0.4)',
   },
@@ -89,13 +90,13 @@ const styles = StyleSheet.create({
   input: {
     width: '100%',
     height: 40,
-    backgroundColor: 'white',
+    backgroundColor: 'rgba(255, 255, 255, 0.7)', // 투명한 흰색 배경
     borderRadius: 5,
     paddingHorizontal: 10,
     marginBottom: 20,
   },
   loginButton: {
-    backgroundColor: '#1E90FF',
+    backgroundColor: 'rgba(178, 39, 212, 0.7)', // 투명한 보라색 배경
     borderRadius: 5,
     paddingVertical: 10,
     paddingHorizontal: 20,
