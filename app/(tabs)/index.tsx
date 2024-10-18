@@ -1,15 +1,15 @@
+import maincarousel from '~/assets/dummy/maincarousel.json';
 import { router, Stack } from 'expo-router';
-import { View, Image } from 'react-native';
+import { View, Image, ScrollView } from 'react-native';
 import React from 'react';
 import CustomCarousel from '~/components/customCarousel';
-import maincarousel from 'assets/dummy/maincarousel.json';
 import MainMenu from '~/components/maincategory/mainmenu';
 import LessonCard from '~/components/todayvoca/lessoncard';
 import GrayLine from '~/components/grayline';
 
 export default function Events() {
   return (
-    <View className="bg-white">
+    <ScrollView className="bg-white">
       {/* 전체 화면을 차지 */}
       {/* 스택 타이틀 설정 */}
       <Stack.Screen
@@ -34,6 +34,6 @@ export default function Events() {
         participationCount={10}
         points={500}
       />
-    </View>
+    </ScrollView>
   );
 }

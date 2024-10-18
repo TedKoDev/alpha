@@ -8,6 +8,7 @@ import TopicTestIcon from '../../assets/icons/topictest.svg';
 import TravelIcon from '../../assets/icons/travel.svg';
 import ContractIcon from '../../assets/icons/contract.svg';
 import VocaIcon from '../../assets/icons/voca.svg';
+import { useRouter } from 'expo-router';
 
 interface MenuItemProps {
   color: string;
@@ -17,10 +18,10 @@ interface MenuItemProps {
 }
 
 const MenuItem: React.FC<MenuItemProps> = ({ color, label, route, icon: Icon }) => {
-  const navigation = useNavigation();
+  const router = useRouter();
 
   const handlePress = () => {
-    navigation.navigate(route as never); // 클릭 시 라우터 이동
+    router.push(route as any); // 클릭 시 라우터 이동
   };
 
   return (
@@ -52,7 +53,7 @@ const MenuItem: React.FC<MenuItemProps> = ({ color, label, route, icon: Icon }) 
 
 const MainMenu = () => {
   const menuItems = [
-    { color: '#ADD8FF', label: 'VOCA', route: 'SportsField', icon: VocaIcon },
+    { color: '#ADD8FF', label: 'VOCA', route: '/voca', icon: VocaIcon },
     { color: '#D1B3FF', label: 'TOPIK', route: 'Glamping', icon: TopicTestIcon },
     { color: '#FFCCFF', label: 'Edu', route: 'Accommodation', icon: SchoolIcon },
     { color: '#FFEB3B', label: 'JOB', route: 'EmotionalStay', icon: JobIcon },

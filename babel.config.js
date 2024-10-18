@@ -1,10 +1,9 @@
 module.exports = function (api) {
   api.cache(true);
-  const plugins = [];
-
   return {
     presets: [['babel-preset-expo', { jsxImportSource: 'nativewind' }], 'nativewind/babel'],
-
-    plugins: ['react-native-reanimated/plugin'],
+    plugins: [
+      'react-native-reanimated/plugin', // 항상 가장 마지막에 위치해야 함
+    ],
   };
 };

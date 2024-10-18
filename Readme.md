@@ -20,3 +20,7 @@ npm install react-native-reanimated-carousel react-native-reanimated
 
 npm install react-native-svg
 npm install --save-dev react-native-svg-transformer
+
+## reanimation
+
+npx expo install react-native-reanimated react-native-gesture-handler
