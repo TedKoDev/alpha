@@ -11,3 +11,14 @@ export const loginApi = async (email: string, password: string) => {
     throw new Error('Login failed');
   }
 };
+
+export const registerApi = async (name: string, email: string, password: string) => {
+  try {
+    const response = await api.post('/auth/register', { name, email, password });
+    console.log('Register success', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Register failed', error);
+    throw new Error('Register failed');
+  }
+};

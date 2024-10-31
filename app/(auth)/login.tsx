@@ -26,8 +26,6 @@ export default function LoginScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ headerShown: false }} />
-
       <View style={styles.container}>
         <Video
           source={require('../../assets/background.mp4')}
@@ -62,6 +60,10 @@ export default function LoginScreen() {
 
           <Pressable style={styles.loginButton} onPress={handleLogin}>
             <Text style={styles.loginButtonText}>Login</Text>
+          </Pressable>
+
+          <Pressable style={styles.loginButton} onPress={() => router.push('/register')}>
+            <Text style={styles.loginButtonText}>Register</Text>
           </Pressable>
         </View>
       </View>
