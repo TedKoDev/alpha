@@ -1,13 +1,14 @@
 import maincarousel from '~/assets/dummy/maincarousel.json';
 import { router, Stack } from 'expo-router';
 import { View, Image, ScrollView } from 'react-native';
-import React from 'react';
+import React, { useEffect } from 'react';
 import CustomCarousel from '~/components/customCarousel';
 import MainMenu from '~/components/maincategory/mainmenu';
 import LessonCard from '~/components/todayvoca/lessoncard';
 import GrayLine from '~/components/grayline';
+import { useAuthStore } from '~/store/authStore';
 
-export default function Events() {
+export default function Home() {
   return (
     <ScrollView className="bg-white">
       {/* 전체 화면을 차지 */}

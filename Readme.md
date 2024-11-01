@@ -24,3 +24,7 @@ npm install --save-dev react-native-svg-transformer
 ## reanimation
 
 npx expo install react-native-reanimated react-native-gesture-handler
+
+## 디바운스를 위한
+
+npm install --save-dev @types/lodash

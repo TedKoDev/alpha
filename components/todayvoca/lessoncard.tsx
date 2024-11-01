@@ -4,8 +4,12 @@ import { AngleRiget, FlameIcon } from '~/assets/icons';
 import AngleRightIcon from '~/assets/icons/AnglerightIcon';
 import GrayLine from '../grayline';
 import { ResizeMode, Video } from 'expo-av';
+import { useAuthStore } from '~/store/authStore';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 
 export default function LessonCard({ onMorePress, participationCount = 0, points = 0 }: any) {
+  const { userInfo } = useAuthStore(); // userInfo 가져오기
+
   const words = ['사랑', '행복', '기쁨']; // 예시 단어들
   const sentences = ['나는 사랑을 느껴요', '행복한 하루를 보내요', '기쁨이 가득한 날이에요']; // 예시 문장들
   const participantCount = 128; // 참여한 사람 수
@@ -17,7 +21,15 @@ export default function LessonCard({ onMorePress, participationCount = 0, points
         {/* <FlameIcon width={40} height={40} />
          */}
 
-        <Image source={require('../../assets/flare.png')} style={{ width: 50, height: 50 }} />
+        {/* 프로필 이미지 삽입 */}
+        {userInfo?.profile_picture_url ? (
+          <Image
+            source={{ uri: userInfo.profile_picture_url }}
+            style={{ width: 50, height: 50, borderRadius: 25 }} // 원형 이미지
+          />
+        ) : (
+          <FontAwesome name="user-circle" size={50} color="#B227D4" /> // FontAwesome 기본 아바타
+        )}
 
         {/* <Video
           source={require('../../assets/flare.mp4')}
@@ -44,7 +56,7 @@ export default function LessonCard({ onMorePress, participationCount = 0, points
             </TouchableOpacity>
           </View>
           <View className="flex bg-white">
-            <Text className="text-lg text-black  ">Points : {points} P</Text>
+            <Text className="text-lg text-black  ">Points : {userInfo.points} P</Text>
           </View>
         </View>
       </View>

@@ -3,8 +3,11 @@ import React from 'react';
 import { Image, View, Text } from 'react-native';
 import { HeaderButton } from '../../components/HeaderButton';
 import { TabBarIcon } from '../../components/TabBarIcon';
+import { useAuthStore } from '~/store/authStore';
 
 export default function TabLayout() {
+  const { userInfo } = useAuthStore(); // userInfo를 가져오
+
   return (
     <Tabs
       screenOptions={{
@@ -22,7 +25,9 @@ export default function TabLayout() {
                 source={require('../../assets/icon.png')}
                 style={{ width: 40, height: 40, marginLeft: 16, marginRight: 5 }}
               />
-              <Text style={{ fontSize: 20, fontWeight: 'bold' }}>반가워요, 테스터1님!</Text>
+              <Text style={{ fontSize: 20, fontWeight: 'bold' }}>
+                반가워요, {userInfo?.username} 님
+              </Text>
             </View>
           ),
           headerRight: () => (
