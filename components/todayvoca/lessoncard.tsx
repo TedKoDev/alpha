@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { AngleRiget, FlameIcon } from '~/assets/icons';
 import AngleRightIcon from '~/assets/icons/AnglerightIcon';
@@ -6,13 +6,31 @@ import GrayLine from '../grayline';
 import { ResizeMode, Video } from 'expo-av';
 import { useAuthStore } from '~/store/authStore';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { useWordStore } from '~/store/wordStore';
+import { format } from 'date-fns';
 
 export default function LessonCard({ onMorePress, participationCount = 0, points = 0 }: any) {
   const { userInfo } = useAuthStore(); // userInfo 가져오기
+  const { todayWords, fetchTodayWords } = useWordStore();
 
-  const words = ['사랑', '행복', '기쁨']; // 예시 단어들
+  // 컴포넌트 마운트 시 단어 가져오기
+  useEffect(() => {
+    fetchTodayWords();
+  }, []);
   const sentences = ['나는 사랑을 느껴요', '행복한 하루를 보내요', '기쁨이 가득한 날이에요']; // 예시 문장들
   const participantCount = 128; // 참여한 사람 수
+
+  const getFormattedDate = () => {
+    try {
+      const seoulDate = new Date();
+      return format(seoulDate, 'MMM dd, yyyy');
+    } catch (error) {
+      console.error('Date formatting error:', error);
+      return '';
+    }
+  };
+
+  const formattedDate = getFormattedDate();
 
   return (
     <View className="rounded-lg bg-white p-5">
@@ -31,22 +49,11 @@ export default function LessonCard({ onMorePress, participationCount = 0, points
           <FontAwesome name="user-circle" size={50} color="#B227D4" /> // FontAwesome 기본 아바타
         )}
 
-        {/* <Video
-          source={require('../../assets/flare.mp4')}
-          rate={1.0}
-          volume={1.0}
-          isMuted={true}
-          resizeMode={ResizeMode.COVER}
-          shouldPlay
-          isLooping
-          style={{ width: 60, height: 60 }}
-        /> */}
-
         {/* 참여 횟수, 내가 쓴 문장 보러가기, 보유 포인트 */}
         <View className="ml-4 flex-1 flex-row  justify-between ">
           <View className="mr-5">
             <Text className="text-base font-bold text-gray-800">
-              참여 횟수: {participationCount}회
+              참여 횟수: {userInfo?.today_task_count}회
             </Text>
             <TouchableOpacity onPress={onMorePress} className="flex-row items-center">
               <Text className="text-sm text-[#B227D4]">See my works</Text>
@@ -56,27 +63,32 @@ export default function LessonCard({ onMorePress, participationCount = 0, points
             </TouchableOpacity>
           </View>
           <View className="flex bg-white">
-            <Text className="text-lg text-black  ">Points : {userInfo.points} P</Text>
+            <Text className="text-lg text-black  ">Points : {userInfo?.points} P</Text>
           </View>
         </View>
       </View>
 
       <View className="mb-4 rounded-lg bg-[#B227D4]/80 p-4">
         <View className="mb-3 flex-row justify-between">
-          <Text className="text-lg font-bold text-white">Today's Words</Text>
+          <View>
+            <View className="flex-row items-center gap-2">
+              <Text className="text-lg font-bold text-white">Today's Words</Text>
+            </View>
+            <Text className="text-sm text-white">{formattedDate}</Text>
+          </View>
           <Text className="text-sm text-white">Joined: {participantCount} Users</Text>
         </View>
 
         {/* 한국어 단어 3가지를 가로로 배치 */}
         {/* 한국어 단어 3가지를 가로로 배치 */}
         <View className="mb-4 flex-row space-x-4">
-          {words.map((word, index) => (
+          {todayWords.map((wordData, index) => (
             <View
               key={index}
               className={`flex-1 items-center justify-center rounded-md bg-white/90 p-3 ${
-                index !== words.length - 1 ? 'mr-2' : 'mr-0' // 마지막 요소에는 mr-0 적용
+                index !== todayWords.length - 1 ? 'mr-2' : 'mr-0'
               }`}>
-              <Text className="text-lg font-bold text-[#B227D4]">{word}</Text>
+              <Text className="text-lg font-bold text-[#B227D4]">{wordData.word}</Text>
             </View>
           ))}
         </View>

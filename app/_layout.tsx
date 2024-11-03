@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { Stack, useRouter } from 'expo-router';
 import { useAuthStore } from '../store/authStore';
@@ -9,6 +10,15 @@ export default function RootLayout() {
   const router = useRouter();
   const [logoAnim] = useState(new Animated.Value(0)); // 로고 애니메이션 초기 크기
   const [loading, setLoading] = useState(true); // 로딩 상태
+
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: 1000 * 60, // 1분
+        gcTime: 1000 * 60 * 5, // 5분
+      },
+    },
+  });
 
   useEffect(() => {
     const checkAuthentication = async () => {
@@ -53,14 +63,16 @@ export default function RootLayout() {
   }
 
   return (
-    <Stack>
-      <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen
-        name="voca"
-        options={{ headerTitle: 'Voca Section', headerShown: false }} // 이름을 'Voca Section'으로 변경
-      />
-      <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
-    </Stack>
+    <QueryClientProvider client={queryClient}>
+      <Stack>
+        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="voca"
+          options={{ headerTitle: 'Voca Section', headerShown: false }} // 이름을 'Voca Section'으로 변경
+        />
+        <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+      </Stack>
+    </QueryClientProvider>
   );
 }
