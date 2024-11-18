@@ -1,8 +1,10 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
 import { Stack, useRouter } from 'expo-router';
-import { useAuthStore } from '../store/authStore';
+import { useEffect, useState } from 'react';
 import { View, ActivityIndicator, Animated, Image } from 'react-native';
+
+import { useAuthStore } from '../store/authStore';
+
 import '../global.css';
 
 export default function RootLayout() {

@@ -1,6 +1,6 @@
 import { Link, Tabs } from 'expo-router';
 import React from 'react';
-import { Image, View, Text } from 'react-native';
+import { Image, View, Text, TouchableOpacity } from 'react-native';
 import { HeaderButton } from '../../components/HeaderButton';
 import { TabBarIcon } from '../../components/TabBarIcon';
 import { useAuthStore } from '~/store/authStore';
@@ -31,9 +31,16 @@ export default function TabLayout() {
             </View>
           ),
           headerRight: () => (
-            <Link href="/modal" asChild>
-              <HeaderButton />
-            </Link>
+            <>
+              <Link href="/modal" asChild>
+                <HeaderButton />
+              </Link>
+              <Link href="/write" asChild>
+                <TouchableOpacity style={{ marginRight: 15 }}>
+                  <TabBarIcon name="pencil" color="#000" />
+                </TouchableOpacity>
+              </Link>
+            </>
           ),
         }}
       />

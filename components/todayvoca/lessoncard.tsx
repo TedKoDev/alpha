@@ -1,24 +1,71 @@
-import React, { useEffect } from 'react';
-import { View, Text, TouchableOpacity, Image } from 'react-native';
-import { AngleRiget, FlameIcon } from '~/assets/icons';
-import AngleRightIcon from '~/assets/icons/AnglerightIcon';
-import GrayLine from '../grayline';
-import { ResizeMode, Video } from 'expo-av';
-import { useAuthStore } from '~/store/authStore';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { useWordStore } from '~/store/wordStore';
 import { format } from 'date-fns';
+import React from 'react';
+import { View, Text, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
+
+import GrayLine from '../grayline';
+
+import AngleRightIcon from '~/assets/icons/AnglerightIcon';
+import { useLogs } from '~/queries/hooks/logs/useLogs';
+import { usePosts } from '~/queries/hooks/posts/usePosts';
+import { useWords } from '~/queries/hooks/word/useWords';
+import { useAuthStore } from '~/store/authStore';
+
+interface PostContent {
+  content: string;
+}
+
+// interface PostsResponse {
+//   data: Post[];
+//   limit: number;
+//   page: number;
+//   total: number;
+// }
+
+interface Post {
+  comments: any;
+  likes: any;
+  post_content: PostContent;
+  post_id: number;
+  username: string;
+}
 
 export default function LessonCard({ onMorePress, participationCount = 0, points = 0 }: any) {
-  const { userInfo } = useAuthStore(); // userInfo 가져오기
-  const { todayWords, fetchTodayWords } = useWordStore();
+  const { userInfo } = useAuthStore(); // userInfo 가져오
 
-  // 컴포넌트 마운트 시 단어 가져오기
-  useEffect(() => {
-    fetchTodayWords();
-  }, []);
-  const sentences = ['나는 사랑을 느껴요', '행복한 하루를 보내요', '기쁨이 가득한 날이에요']; // 예시 문장들
-  const participantCount = 128; // 참여한 사람 수
+  const { data: todayWords, isLoading } = useWords();
+  // TODAY_TASK_PARTICIPATION 사용 시
+  const { data: participationLogs } = useLogs({ type: 'TODAY_TASK_PARTICIPATION' });
+
+  const {
+    data: posts,
+    isLoading: postsLoading,
+  }: {
+    data: any;
+    isLoading: any;
+    error: any;
+  } = usePosts({
+    page: 1,
+    limit: 5,
+    sort: 'latest',
+    type: 'SENTENCE',
+  });
+
+  if (postsLoading || isLoading) {
+    return (
+      <View className="items-center justify-center rounded-lg bg-white p-5" style={{ height: 300 }}>
+        <ActivityIndicator size="large" color="#B227D4" />
+      </View>
+    );
+  }
+
+  if (!todayWords) {
+    return (
+      <View className="items-center justify-center rounded-lg bg-white p-5">
+        <Text>오늘의 단어를 불러올 수 없습니다.</Text>
+      </View>
+    );
+  }
 
   const getFormattedDate = () => {
     try {
@@ -76,13 +123,11 @@ export default function LessonCard({ onMorePress, participationCount = 0, points
             </View>
             <Text className="text-sm text-white">{formattedDate}</Text>
           </View>
-          <Text className="text-sm text-white">Joined: {participantCount} Users</Text>
+          <Text className="text-sm text-white">Joined: {participationLogs.count} Users</Text>
         </View>
-
-        {/* 한국어 단어 3가지를 가로로 배치 */}
         {/* 한국어 단어 3가지를 가로로 배치 */}
         <View className="mb-4 flex-row space-x-4">
-          {todayWords.map((wordData, index) => (
+          {todayWords.map((wordData: any, index: number) => (
             <View
               key={index}
               className={`flex-1 items-center justify-center rounded-md bg-white/90 p-3 ${
@@ -93,23 +138,38 @@ export default function LessonCard({ onMorePress, participationCount = 0, points
           ))}
         </View>
 
-        {/* 최근 참여한 사람의 문장 3개 */}
+        {/* 최근 참여한 사람의 문장 */}
         <View className="mb-3 rounded-md bg-white/90 p-3">
-          {sentences.map((sentence, index) => (
-            <Text key={index} className="mb-2 text-sm text-[#B227D4]">
-              {sentence}
-            </Text>
-          ))}
+          {postsLoading ? (
+            <ActivityIndicator size="small" color="#B227D4" />
+          ) : (
+            posts?.data?.map((post: Post, index: number) => (
+              <View key={index} className="mb-2 flex-row items-center justify-between">
+                <Text className="flex-1 text-sm text-[#B227D4]">{post.post_content.content}</Text>
+                <View className="ml-2 flex-row gap-3">
+                  <View className="flex-row items-center gap-1">
+                    <FontAwesome name="heart" size={12} color="#666666" />
+                    <Text className="text-xs text-gray-500">{post.likes}</Text>
+                  </View>
+                  <View className="flex-row items-center gap-1">
+                    <FontAwesome name="comment" size={12} color="#666666" />
+                    <Text className="text-xs text-gray-500">{post.comments.length}</Text>
+                  </View>
+                </View>
+              </View>
+            ))
+          )}
 
           <GrayLine thickness={1} marginTop={5} marginBottom={5} />
-          {/* 더보기 터치 가능 */}
-          <TouchableOpacity onPress={onMorePress}>
+          <TouchableOpacity>
             <Text className="text-center font-bold text-[#B227D4]">더보기 . . .</Text>
           </TouchableOpacity>
         </View>
 
         {/* 참여하기 버튼 */}
-        <TouchableOpacity className="items-center justify-center rounded-md bg-white py-3">
+        <TouchableOpacity
+          className="items-center justify-center rounded-md bg-white py-3"
+          onPress={onMorePress}>
           <Text className="text-lg font-bold text-[#B227D4]">참여하기</Text>
         </TouchableOpacity>
       </View>

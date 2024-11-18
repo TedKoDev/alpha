@@ -1,13 +1,14 @@
-import maincarousel from '~/assets/dummy/maincarousel.json';
+import { useQuery } from '@tanstack/react-query';
 import { router, Stack } from 'expo-router';
-import { View, Image, ScrollView, RefreshControl } from 'react-native';
 import React, { useEffect } from 'react';
+import { View, Image, ScrollView, RefreshControl } from 'react-native';
+
+import maincarousel from '~/assets/dummy/maincarousel.json';
 import CustomCarousel from '~/components/customCarousel';
+import GrayLine from '~/components/grayline';
 import MainMenu from '~/components/maincategory/mainmenu';
 import LessonCard from '~/components/todayvoca/lessoncard';
-import GrayLine from '~/components/grayline';
 import { useAuthStore } from '~/store/authStore';
-import { useQuery } from '@tanstack/react-query';
 
 export default function Home() {
   const { data, refetch, isRefetching } = useQuery({
@@ -42,11 +43,7 @@ export default function Home() {
       <View className="">
         <GrayLine thickness={5} marginTop={10} />
       </View>
-      <LessonCard
-        onMorePress={() => router.push('/(tabs)/feed')}
-        participationCount={10}
-        points={500}
-      />
+      <LessonCard onMorePress={() => router.push('/write')} participationCount={10} points={500} />
     </ScrollView>
   );
 }

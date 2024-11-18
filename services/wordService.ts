@@ -33,4 +33,5 @@ export const getDayPostApi = async () => {
 
 export const authService = {
   getWordApi,
+  getDayPostApi,
 };
