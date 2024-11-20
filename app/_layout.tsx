@@ -78,7 +78,7 @@ export default function RootLayout() {
             headerTintColor: '#D812DC',
           }} // 이름을 'Voca Section'으로 변경
         />
-        <Stack.Screen name="feedlist" options={{ headerShown: false }} />
+
         <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
       </Stack>
     </QueryClientProvider>
