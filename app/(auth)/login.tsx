@@ -1,8 +1,9 @@
+import { Video, ResizeMode } from 'expo-av';
+import { Stack, useRouter } from 'expo-router';
 import React, { useState, useEffect } from 'react';
 import { View, TextInput, Pressable, Text, StyleSheet, ActivityIndicator } from 'react-native';
+
 import { useAuthStore } from '~/store/authStore';
-import { Stack, useRouter } from 'expo-router';
-import { Video, ResizeMode } from 'expo-av';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -56,7 +57,7 @@ export default function LoginScreen() {
           source={require('../../assets/background.mp4')}
           rate={1.0}
           volume={1.0}
-          isMuted={true}
+          isMuted
           resizeMode={ResizeMode.COVER}
           shouldPlay
           isLooping

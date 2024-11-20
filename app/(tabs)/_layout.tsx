@@ -1,12 +1,17 @@
 import { Link, Tabs } from 'expo-router';
 import React from 'react';
 import { Image, View, Text, TouchableOpacity } from 'react-native';
+
 import { HeaderButton } from '../../components/HeaderButton';
 import { TabBarIcon } from '../../components/TabBarIcon';
+
 import { useAuthStore } from '~/store/authStore';
 
 export default function TabLayout() {
-  const { userInfo } = useAuthStore(); // userInfo를 가져오
+  const userInfo = useAuthStore((state) => state.userInfo);
+
+  // userInfo가 중첩 구조인 경우를 처리
+  const username = userInfo?.username;
 
   return (
     <Tabs
@@ -25,9 +30,7 @@ export default function TabLayout() {
                 source={require('../../assets/icon.png')}
                 style={{ width: 40, height: 40, marginLeft: 16, marginRight: 5 }}
               />
-              <Text style={{ fontSize: 20, fontWeight: 'bold' }}>
-                반가워요, {userInfo?.username} 님
-              </Text>
+              <Text style={{ fontSize: 20, fontWeight: 'bold' }}>반가워요, {username} 님</Text>
             </View>
           ),
           headerRight: () => (
@@ -35,11 +38,11 @@ export default function TabLayout() {
               <Link href="/modal" asChild>
                 <HeaderButton />
               </Link>
-              <Link href="/write" asChild>
+              {/* <Link href="/write" asChild>
                 <TouchableOpacity style={{ marginRight: 15 }}>
                   <TabBarIcon name="pencil" color="#000" />
                 </TouchableOpacity>
-              </Link>
+              </Link> */}
             </>
           ),
         }}

@@ -6,30 +6,46 @@ import { View, Text, Image, Pressable } from 'react-native';
 export default function EventListItem({ event }: any) {
   return (
     <Link href={`/event/${event.id}`} asChild>
-      <Pressable className="m-3 gap-3 border-b-2 border-gray-100 pb-3">
-        <View className="flex-row">
-          <View className="flex-1 gap-2">
-            <Text className="text-lg font-semibold uppercase text-amber-800">
-              {dayjs(event.datetime).format('ddd, D MMM')} ·{' '}
-              {dayjs(event.datetime).format('h:mm A')}
-            </Text>
-            <Text className="text-xl font-bold" numberOfLines={2}>
-              {event.title}
-            </Text>
-
-            <Text className="text-gray-700">{event.location}</Text>
-          </View>
-
-          {/* Event image */}
-          <Image source={{ uri: event.image }} className="aspect-video w-2/5 rounded-xl" />
+      <Pressable className="border-b border-gray-200 bg-white p-4">
+        {/* Header with time and author */}
+        <View className="mb-2 flex-row items-center">
+          <Text className="text-sm text-gray-500">
+            {event.author} · {dayjs(event.datetime).format('MM/DD')}
+          </Text>
         </View>
 
-        {/* Footer */}
-        <View className="flex-row gap-3">
-          <Text className="mr-auto text-gray-700">16 going</Text>
+        {/* Content layout changes based on image existence */}
+        <View className={`flex-row ${event.image ? 'gap-4' : ''}`}>
+          <View className={`flex-1 ${event.image ? 'flex-[2]' : ''}`}>
+            <Text className="mb-2 text-lg font-bold" numberOfLines={2}>
+              {event.title}
+            </Text>
+            <Text className="text-base text-gray-600" numberOfLines={2}>
+              {event.description || event.location}
+            </Text>
+          </View>
 
-          <Feather name="share" size={20} color="gray" />
-          <Feather name="bookmark" size={20} color="gray" />
+          {event.image && (
+            <View className="flex-1">
+              <Image
+                source={{ uri: event.image }}
+                className="h-20 w-full rounded-md"
+                resizeMode="cover"
+              />
+            </View>
+          )}
+        </View>
+
+        {/* Footer with engagement metrics */}
+        <View className="mt-3 flex-row items-center">
+          <View className="flex-row items-center">
+            <Feather name="eye" size={16} color="gray" />
+            <Text className="ml-1 text-sm text-gray-500">{event.views || 23}</Text>
+          </View>
+          <View className="ml-4 flex-row items-center">
+            <Feather name="message-square" size={16} color="gray" />
+            <Text className="ml-1 text-sm text-gray-500">{event.comments || 9}</Text>
+          </View>
         </View>
       </Pressable>
     </Link>

@@ -31,25 +31,21 @@ interface Post {
 }
 
 export default function LessonCard({ onMorePress, participationCount = 0, points = 0 }: any) {
-  const { userInfo } = useAuthStore(); // userInfo 가져오
-
+  const userInfo = useAuthStore((state) => state.userInfo);
   const { data: todayWords, isLoading } = useWords();
-  // TODAY_TASK_PARTICIPATION 사용 시
   const { data: participationLogs } = useLogs({ type: 'TODAY_TASK_PARTICIPATION' });
-
-  const {
-    data: posts,
-    isLoading: postsLoading,
-  }: {
-    data: any;
-    isLoading: any;
-    error: any;
-  } = usePosts({
+  const { data: posts, isLoading: postsLoading } = usePosts({
     page: 1,
     limit: 5,
     sort: 'latest',
     type: 'SENTENCE',
   });
+  console.log('Current Auth Store:', useAuthStore.getState());
+  console.log('Current userInfo in LessonCard:', userInfo);
+
+  // 사용자 데이터 구조 통일
+  const userData = userInfo?.user || userInfo;
+  console.log('User data:', userData);
 
   if (postsLoading || isLoading) {
     return (
@@ -82,25 +78,21 @@ export default function LessonCard({ onMorePress, participationCount = 0, points
   return (
     <View className="rounded-lg bg-white p-5">
       <View className="mb-4 flex-row items-center">
-        {/* 불꽃 아이콘 삽입 */}
-        {/* <FlameIcon width={40} height={40} />
-         */}
-
         {/* 프로필 이미지 삽입 */}
-        {userInfo?.profile_picture_url ? (
+        {userData?.profile_picture_url ? (
           <Image
-            source={{ uri: userInfo.profile_picture_url }}
-            style={{ width: 50, height: 50, borderRadius: 25 }} // 원형 이미지
+            source={{ uri: userData.profile_picture_url }}
+            style={{ width: 50, height: 50, borderRadius: 25 }}
           />
         ) : (
-          <FontAwesome name="user-circle" size={50} color="#B227D4" /> // FontAwesome 기본 아바타
+          <FontAwesome name="user-circle" size={50} color="#B227D4" />
         )}
 
         {/* 참여 횟수, 내가 쓴 문장 보러가기, 보유 포인트 */}
-        <View className="ml-4 flex-1 flex-row  justify-between ">
+        <View className="ml-4 flex-1 flex-row justify-between">
           <View className="mr-5">
             <Text className="text-base font-bold text-gray-800">
-              참여 횟수: {userInfo?.today_task_count}회
+              참여 횟수: {userData?.today_task_count || 0}회
             </Text>
             <TouchableOpacity onPress={onMorePress} className="flex-row items-center">
               <Text className="text-sm text-[#B227D4]">See my works</Text>
@@ -110,7 +102,7 @@ export default function LessonCard({ onMorePress, participationCount = 0, points
             </TouchableOpacity>
           </View>
           <View className="flex bg-white">
-            <Text className="text-lg text-black  ">Points : {userInfo?.points} P</Text>
+            <Text className="text-lg text-black">Points : {userData?.points || 0} P</Text>
           </View>
         </View>
       </View>
@@ -143,7 +135,7 @@ export default function LessonCard({ onMorePress, participationCount = 0, points
           {postsLoading ? (
             <ActivityIndicator size="small" color="#B227D4" />
           ) : (
-            posts?.data?.map((post: Post, index: number) => (
+            posts?.data?.map((post: any, index: number) => (
               <View key={index} className="mb-2 flex-row items-center justify-between">
                 <Text className="flex-1 text-sm text-[#B227D4]">{post.post_content.content}</Text>
                 <View className="ml-2 flex-row gap-3">

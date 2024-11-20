@@ -40,9 +40,27 @@ export const checkName = async (name: string): Promise<boolean> => {
   return name.length >= 2;
 };
 
+export const getUserInfoApi = async (token: string) => {
+  try {
+    const response = await api.get('/users/me', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('getUserInfoApi error details:', (error as any).response?.data);
+      throw error;
+    }
+    throw new Error('An unknown error occurred');
+  }
+};
+
 export const authService = {
   checkEmail,
   checkName,
   loginApi,
   registerApi,
+  getUserInfoApi,
 };

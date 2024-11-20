@@ -19,6 +19,8 @@ import { useAuthStore } from '~/store/authStore';
 
 export default function MyPage() {
   const { logout, userInfo, updateUserInfo } = useAuthStore();
+
+  console.log(userInfo);
   const [modalVisible, setModalVisible] = useState(false);
   const [editedProfile, setEditedProfile] = useState({
     username: userInfo?.username || '',

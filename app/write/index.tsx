@@ -7,7 +7,7 @@ export default function WriteScreen() {
     <View className="flex-1 bg-white">
       <Stack.Screen
         options={{
-          headerTitle: '글쓰기',
+          headerTitle: '글쓰기1',
         }}
       />
       <Text>Write Screen</Text>
