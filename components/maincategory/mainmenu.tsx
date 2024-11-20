@@ -54,8 +54,8 @@ const MenuItem: React.FC<MenuItemProps> = ({ color, label, route, icon: Icon }) 
 const MainMenu = () => {
   const menuItems = [
     { color: '#ADD8FF', label: 'VOCA', route: '/voca', icon: VocaIcon },
-    { color: '#D1B3FF', label: 'TOPIK', route: 'Glamping', icon: TopicTestIcon },
-    { color: '#FFCCFF', label: 'Edu', route: 'Accommodation', icon: SchoolIcon },
+    { color: '#D1B3FF', label: 'TOPIK', route: '/topik', icon: TopicTestIcon },
+    { color: '#FFCCFF', label: 'Edu', route: '/edu', icon: SchoolIcon },
     { color: '#FFEB3B', label: 'JOB', route: 'EmotionalStay', icon: JobIcon },
     { color: '#00FFCC', label: 'AGENCY', route: 'Activity', icon: TravelIcon },
   ];

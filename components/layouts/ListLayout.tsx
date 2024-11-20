@@ -3,7 +3,12 @@ import { Stack, useRouter } from 'expo-router';
 import React from 'react';
 import { TouchableOpacity } from 'react-native';
 
-export default function VocaLayout() {
+type ListLayoutProps = {
+  headerTitle: string;
+  children: React.ReactNode;
+};
+
+export default function ListLayout({ headerTitle, children }: ListLayoutProps) {
   const router = useRouter();
 
   return (
@@ -15,7 +20,7 @@ export default function VocaLayout() {
       <Stack.Screen
         name="index"
         options={{
-          headerTitle: 'Voca Section',
+          headerTitle: headerTitle,
           headerShown: true,
           headerLeft: () => (
             <TouchableOpacity onPress={() => router.back()} className="ml-4">
@@ -25,7 +30,7 @@ export default function VocaLayout() {
         }}
       />
       <Stack.Screen
-        name="detail/[id]/index"
+        name="[id]"
         options={{
           headerTitle: '',
           headerShown: true,
@@ -36,6 +41,7 @@ export default function VocaLayout() {
           ),
         }}
       />
+      {children}
     </Stack>
   );
 }

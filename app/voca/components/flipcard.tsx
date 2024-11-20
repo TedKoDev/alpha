@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Animated, {
@@ -6,9 +7,16 @@ import Animated, {
   withTiming,
   runOnJS,
 } from 'react-native-reanimated';
-import { useRouter } from 'expo-router';
 
-const FlipCard = ({ frontText, backText, detailRoute }) => {
+const FlipCard = ({
+  frontText,
+  backText,
+  detailRoute,
+}: {
+  frontText: string;
+  backText: string;
+  detailRoute: string;
+}) => {
   const rotation = useSharedValue(0);
   const isFlipped = useSharedValue(false);
 
@@ -26,7 +34,7 @@ const FlipCard = ({ frontText, backText, detailRoute }) => {
 
   const navigationDetail = () => {
     console.log('navigationDetail');
-    router.navigate(detailRoute);
+    router.push(detailRoute);
   };
 
   const handlePress = () => {

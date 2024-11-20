@@ -10,6 +10,7 @@ import { useLogs } from '~/queries/hooks/logs/useLogs';
 import { usePosts } from '~/queries/hooks/posts/usePosts';
 import { useWords } from '~/queries/hooks/word/useWords';
 import { useAuthStore } from '~/store/authStore';
+import { useRouter } from 'expo-router';
 
 interface PostContent {
   content: string;
@@ -46,6 +47,8 @@ export default function LessonCard({ onMorePress, participationCount = 0, points
   // 사용자 데이터 구조 통일
   const userData = userInfo?.user || userInfo;
   console.log('User data:', userData);
+
+  const router = useRouter();
 
   if (postsLoading || isLoading) {
     return (
@@ -94,7 +97,9 @@ export default function LessonCard({ onMorePress, participationCount = 0, points
             <Text className="text-base font-bold text-gray-800">
               참여 횟수: {userData?.today_task_count || 0}회
             </Text>
-            <TouchableOpacity onPress={onMorePress} className="flex-row items-center">
+            <TouchableOpacity
+              onPress={() => router.push('/(tabs)/mypage')}
+              className="flex-row items-center">
               <Text className="text-sm text-[#B227D4]">See my works</Text>
               <View className="ml-2 mt-0.5">
                 <AngleRightIcon width={10} height={10} color="#B227D4" />
@@ -153,7 +158,7 @@ export default function LessonCard({ onMorePress, participationCount = 0, points
           )}
 
           <GrayLine thickness={1} marginTop={5} marginBottom={5} />
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => router.push('/feedlist')}>
             <Text className="text-center font-bold text-[#B227D4]">더보기 . . .</Text>
           </TouchableOpacity>
         </View>
