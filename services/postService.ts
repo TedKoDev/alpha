@@ -5,10 +5,8 @@ import { useAuthStore } from '../store/authStore';
 export type PostType = 'SENTENCE' | 'GENERAL' | 'COLUMN' | 'QUESTION';
 
 export interface CreateMediaDto {
-  // 미디어 관련 필드 정의
   url: string;
-  type: string;
-  // 기타 필요한 미디어 필드
+  type: 'IMAGE' | 'VIDEO';
 }
 
 export interface CreatePostDto {
@@ -56,7 +54,6 @@ export const addPostApi = async (createPostDto: CreatePostDto) => {
     const token = useAuthStore.getState().userToken;
 
     if (!token) {
-      throw new Error('No token found');
     }
     //console.log('createPostDto', createPostDto);
 
