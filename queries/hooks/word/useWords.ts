@@ -20,7 +20,7 @@ export function useWords() {
     queryFn: () => getWordApi(),
     enabled: !!token,
     onSuccess: (data: Word[]) => {
-      console.log('API 응답:', data);
+      //console.log('API 응답:', data);
     },
     onError: (error: any) => {
       console.error('API 에러:', error);

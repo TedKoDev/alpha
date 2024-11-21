@@ -1,43 +1,88 @@
+import { Feather } from '@expo/vector-icons';
 import dayjs from 'dayjs';
 import { useLocalSearchParams, Stack } from 'expo-router';
-import { Text, View, Image, Pressable } from 'react-native';
+import { Text, View, Image, Pressable, ScrollView } from 'react-native';
 
-import events from '~/assets/events.json';
+import CommentSection from './components/CommentSection';
+import UserInfo from './components/UserInfo';
+
+import { useGetPostById } from '~/queries/hooks/posts/usePosts';
 
 export default function EventPage() {
-  const { id } = useLocalSearchParams(); // URL 파라미터 가져오기
+  const { id } = useLocalSearchParams();
+  const { data: post, isLoading } = useGetPostById(Number(id));
 
-  const event = events.find((e) => e.id === id); // 이벤트 데이터 찾기
+  //console.log('post', post);
 
-  if (!event) {
-    return <Text>Event not found</Text>;
+  if (isLoading) {
+    return <Text>Loading...</Text>;
+  }
+
+  if (!post) {
+    return <Text>Post not found</Text>;
   }
 
   return (
-    <View className="flex-1 gap-3 bg-white p-3">
+    <View className="flex-1 bg-white">
       <Stack.Screen
-        options={{ title: 'Event', headerBackTitleVisible: false, headerTintColor: 'black' }}
+        options={{
+          headerTitle: '상세보기',
+          headerBackTitleVisible: false,
+          headerTintColor: 'black',
+        }}
       />
 
-      <Image source={{ uri: event.image }} className="aspect-video w-full rounded-xl" />
+      <ScrollView className="flex-1">
+        <UserInfo
+          username={post.username}
+          createdAt={dayjs(post.created_at).format('YYYY.MM.DD HH:mm')}
+          user_level={post.user_level}
+          user_profile_picture_url={post.user_profile_picture_url}
+        />
 
-      <Text className="text-3xl font-bold" numberOfLines={2}>
-        {event.title}
-      </Text>
-      <Text className="text-lg font-semibold uppercase text-amber-800">
-        {dayjs(event.datetime).format('ddd, D MMM')} · {dayjs(event.datetime).format('h:mm A')}
-      </Text>
+        {/* Main Content */}
+        <View className="p-4">
+          {post.post_content.title && (
+            <Text className="mb-2 text-lg font-bold">{post.post_content.title}</Text>
+          )}
 
-      <Text className="text-lg" numberOfLines={2}>
-        {event.description}
-      </Text>
+          {post.media && post.media.length > 0 && (
+            <Image source={{ uri: post.media[0] }} className="mb-4 h-72 w-full rounded-lg" />
+          )}
 
-      {/* Footer */}
-      <View className="absolute bottom-0 left-0 right-0 flex-row items-center justify-between border-t-2 border-gray-300 p-5 pb-10">
-        <Text className="text-xl font-semibold">Free</Text>
+          {post.post_content.content && (
+            <Text className="mb-4 text-base text-gray-800">{post.post_content.content}</Text>
+          )}
 
-        <Pressable className="rounded-md bg-red-500 p-5 px-8">
-          <Text className="text-lg font-bold text-white">Join and RSVP</Text>
+          {/* Engagement Stats */}
+          <View className="mt-2 flex-row items-center gap-4 border-b border-gray-200 pb-4">
+            <View className="flex-row items-center">
+              <Feather name="heart" size={16} color="#666666" />
+              <Text className="ml-1 text-sm text-gray-500">{post.likes}</Text>
+            </View>
+            <View className="flex-row items-center">
+              <Feather name="message-square" size={16} color="#666666" />
+              <Text className="ml-1 text-sm text-gray-500">{post.comments?.length || 0}</Text>
+            </View>
+            <View className="flex-row items-center">
+              <Feather name="eye" size={16} color="#666666" />
+              <Text className="ml-1 text-sm text-gray-500">{post.views}</Text>
+            </View>
+            <View className="flex-row items-center">
+              <Feather name="bookmark" size={16} color="#666666" />
+              <Text className="ml-1 text-sm text-gray-500">저장하기</Text>
+            </View>
+          </View>
+
+          {/* Comments Section */}
+          <CommentSection comments={post.comments} />
+        </View>
+      </ScrollView>
+
+      {/* Comment Input */}
+      <View className="mb-3 border-t border-gray-200 px-4 py-5">
+        <Pressable className="flex-row items-center rounded-full bg-gray-100 px-4 py-2">
+          <Text className="text-gray-500">댓글을 입력하세요...</Text>
         </Pressable>
       </View>
     </View>

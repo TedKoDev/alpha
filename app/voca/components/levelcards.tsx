@@ -4,7 +4,7 @@ import FlipCard from './flipcard';
 
 const LevelCards = () => {
   const cards = Array.from({ length: 100 }, (_, index) => ({
-    frontText: `Level ${index + 1}`,
+    frontText: `Lv ${index + 1}`,
     backText: `Word ${String.fromCharCode(65 + (index % 26))}`,
     detailRoute: `/voca/detail/${index + 1}`,
   }));

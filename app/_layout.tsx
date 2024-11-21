@@ -41,7 +41,7 @@ export default function RootLayout() {
   // 인증되지 않았을 경우 로그인 페이지로 이동
   useEffect(() => {
     if (!loading && isAuthenticated === false) {
-      console.log('Not authenticated');
+      //console.log('Not authenticated');
       router.replace('/login'); // /auth/login이 아니라 /login으로
     }
   }, [isAuthenticated, loading]);

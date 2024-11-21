@@ -78,7 +78,7 @@ export default function MyPage() {
           />
           <View style={styles.userInfo}>
             <Text style={styles.userName}>{userInfo?.username || 'Student'}</Text>
-            <Text style={styles.rankText}>Level {userInfo?.level || 1}</Text>
+            <Text style={styles.rankText}>Lv {userInfo?.level || 1}</Text>
             <Text style={styles.userEmail}>{userInfo?.email}</Text>
           </View>
           <TouchableOpacity style={styles.editProfileButton} onPress={() => setModalVisible(true)}>
@@ -95,19 +95,19 @@ export default function MyPage() {
         {/* Activity Section */}
         <View style={styles.activitySection}>
           <View style={styles.activityItem}>
-            <Text style={styles.activityNumber}>{userInfo?._count?.post || 0}</Text>
+            <Text style={styles.activityNumber}>{userInfo?.stats?.postCount || 0}</Text>
             <Text style={styles.activityLabel}>Posts</Text>
           </View>
           <View style={styles.activityItem}>
-            <Text style={styles.activityNumber}>{userInfo?._count?.comment || 0}</Text>
+            <Text style={styles.activityNumber}>{userInfo?.stats?.commentCount || 0}</Text>
             <Text style={styles.activityLabel}>Comments</Text>
           </View>
           <View style={styles.activityItem}>
-            <Text style={styles.activityNumber}>{userInfo?._count?.followers || 0}</Text>
+            <Text style={styles.activityNumber}>{userInfo?.stats?.followersCount || 0}</Text>
             <Text style={styles.activityLabel}>Followers</Text>
           </View>
           <View style={styles.activityItem}>
-            <Text style={styles.activityNumber}>{userInfo?._count?.following || 0}</Text>
+            <Text style={styles.activityNumber}>{userInfo?.stats?.followingCount || 0}</Text>
             <Text style={styles.activityLabel}>Following</Text>
           </View>
         </View>

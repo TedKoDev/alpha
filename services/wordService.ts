@@ -4,7 +4,7 @@ import { useAuthStore } from '../store/authStore';
 export const getWordApi = async () => {
   try {
     const token = useAuthStore.getState().userToken;
-    console.log('token', token);
+    //console.log('token', token);
     if (!token) {
       throw new Error('No token found');
     }

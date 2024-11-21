@@ -25,7 +25,7 @@ const CustomCarousel: React.FC<CustomCarouselProps> = ({
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const windowWidth = Dimensions.get('window').width;
-  // console.log('windowWidth:', windowWidth);
+  // //console.log('windowWidth:', windowWidth);
 
   const carouselWidth = width || windowWidth;
   const carouselHeight = height || 170;
@@ -34,7 +34,7 @@ const CustomCarousel: React.FC<CustomCarouselProps> = ({
   const handlePress = (item: CarouselItem) => {
     if (item.link) {
       if (item.link.startsWith('http')) {
-        console.log('Open URL:', item.link);
+        //console.log('Open URL:', item.link);
       } else {
         navigation.navigate(item.link as never);
       }

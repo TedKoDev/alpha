@@ -30,6 +30,7 @@ export default function Home() {
       queryClient.invalidateQueries({ queryKey: ['words'] }),
       queryClient.invalidateQueries({ queryKey: ['logs'] }),
       queryClient.invalidateQueries({ queryKey: ['posts'] }),
+      queryClient.invalidateQueries({ queryKey: ['todayWords'] }),
     ]);
   };
 

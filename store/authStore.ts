@@ -24,13 +24,13 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   register: async (name: string, email: string, password: string) => {
     const response = await registerApi(name, email, password);
-    console.log('register response', response);
+    //console.log('register response', response);
   },
 
   login: async (email: string, password: string) => {
     const data = await loginApi(email, password);
-    console.log('login token', data.access_token);
-    console.log('userinfo1243', data.user);
+    //console.log('login token', data.access_token);
+    //console.log('userinfo1243', data.user);
     if (data) {
       await AsyncStorage.setItem('userToken', data.access_token);
       await AsyncStorage.setItem('userInfo', JSON.stringify(data.user));
@@ -67,7 +67,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   setUserInfo: (info) => {
-    console.log('Setting new userInfo:', info);
+    //console.log('Setting new userInfo:', info);
     set({ userInfo: info });
   },
 

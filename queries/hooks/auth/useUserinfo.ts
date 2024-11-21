@@ -50,7 +50,7 @@ export const useRefreshUserInfo = () => {
       if (!token) throw new Error('No token available');
 
       const response = await getUserInfoApi(token);
-      console.log('API Response:', response); // 디버깅용
+      //console.log('API Response:', response); // 디버깅용
 
       if (!response) {
         throw new Error('No data received from API');
@@ -60,13 +60,13 @@ export const useRefreshUserInfo = () => {
       const newUserInfo = response;
 
       // Store 업데이트 전 로깅
-      console.log('Updating store with:', newUserInfo);
+      //console.log('Updating store with:', newUserInfo);
 
       setUserInfo(newUserInfo);
       queryClient.setQueryData(['userInfo'], newUserInfo);
 
       // Store 업데이트 후 확인
-      console.log('Updated store:', useAuthStore.getState().userInfo);
+      //console.log('Updated store:', useAuthStore.getState().userInfo);
 
       return newUserInfo;
     } catch (error) {

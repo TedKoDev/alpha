@@ -8,7 +8,7 @@ export default function Detail() {
 
   useEffect(() => {
     navigation.setOptions({
-      headerTitle: `Level ${id}`,
+      headerTitle: `Lv ${id}`,
       headerStyle: {
         backgroundColor: '#fff',
       },

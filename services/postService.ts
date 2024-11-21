@@ -58,7 +58,7 @@ export const addPostApi = async (createPostDto: CreatePostDto) => {
     if (!token) {
       throw new Error('No token found');
     }
-    console.log('createPostDto', createPostDto);
+    //console.log('createPostDto', createPostDto);
 
     const response = await api.post('/posts/', createPostDto, {
       headers: {
@@ -68,6 +68,81 @@ export const addPostApi = async (createPostDto: CreatePostDto) => {
     return response.data;
   } catch (error) {
     console.error('Add post failed', error);
+    throw error;
+  }
+};
+
+// GET API for single post
+export const getPostByIdApi = async (id: number) => {
+  try {
+    const token = useAuthStore.getState().userToken;
+
+    if (!token) {
+      throw new Error('No token found');
+    }
+
+    const response = await api.get(`/posts/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Get post by id failed', error);
+    throw error;
+  }
+};
+
+// 새로운 타입 정의
+export interface Topic {
+  id: number;
+  name: string;
+  categories?: Category[];
+}
+
+export interface Category {
+  id: number;
+  name: string;
+  topicId: number;
+}
+
+// 새로운 API 함수들
+export const getTopicsApi = async () => {
+  try {
+    const token = useAuthStore.getState().userToken;
+
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+
+    const response = await api.get('/posts/topics', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error('Failed to fetch topics:', error);
+    throw error;
+  }
+};
+
+export const getCategoriesByTopicApi = async (topicId: number) => {
+  try {
+    const token = useAuthStore.getState().userToken;
+    if (!token) {
+      throw new Error('No token found');
+    }
+
+    const response = await api.get(`/posts/categories/${topicId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Get categories failed', error);
     throw error;
   }
 };

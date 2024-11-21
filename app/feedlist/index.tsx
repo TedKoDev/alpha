@@ -1,19 +1,40 @@
-import ListLayout from '~/components/layouts/ListLayout';
+import { Text } from 'react-native';
 
-const feedData = [
-  {
-    id: '1',
-    author: '커직이',
-    title: '지금 숙대 앞에서 열리는 베스트 브레드 여행! 5선!',
-    content: '여행은 사람을 설레게 죽이는 시사회며...',
-    datetime: new Date().toISOString(),
-    image: null,
-    views: 23,
-    comments: 9,
-    likes: 32,
-  },
-];
+import ListLayout from '~/components/layouts/ListLayout';
+import { usePosts } from '~/queries/hooks/posts/usePosts';
 
 export default function FeedList() {
-  return <ListLayout headerTitle="커뮤니티" data={feedData} showViewToggle />;
+  const {
+    data: postsData,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    refetch,
+    isRefetching,
+  } = usePosts({
+    page: 1,
+    limit: 15,
+    sort: 'latest',
+    type: 'SENTENCE',
+  });
+
+  const allPosts = postsData?.pages?.flatMap((page) => page.data) ?? [];
+
+  return isLoading ? (
+    <Text>Loading...</Text>
+  ) : (
+    <ListLayout
+      headerTitle="커뮤니티"
+      data={allPosts}
+      showViewToggle
+      onLoadMore={() => {
+        if (hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      }}
+      onRefresh={refetch}
+      isRefreshing={isRefetching}
+    />
+  );
 }

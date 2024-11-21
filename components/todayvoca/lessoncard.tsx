@@ -1,5 +1,6 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { format } from 'date-fns';
+import { useRouter } from 'expo-router';
 import React from 'react';
 import { View, Text, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 
@@ -10,11 +11,10 @@ import { useLogs } from '~/queries/hooks/logs/useLogs';
 import { usePosts } from '~/queries/hooks/posts/usePosts';
 import { useWords } from '~/queries/hooks/word/useWords';
 import { useAuthStore } from '~/store/authStore';
-import { useRouter } from 'expo-router';
 
-interface PostContent {
-  content: string;
-}
+// interface PostContent {
+//   content: string;
+// }
 
 // interface PostsResponse {
 //   data: Post[];
@@ -22,14 +22,6 @@ interface PostContent {
 //   page: number;
 //   total: number;
 // }
-
-interface Post {
-  comments: any;
-  likes: any;
-  post_content: PostContent;
-  post_id: number;
-  username: string;
-}
 
 export default function LessonCard({ onMorePress, participationCount = 0, points = 0 }: any) {
   const userInfo = useAuthStore((state) => state.userInfo);
@@ -41,12 +33,15 @@ export default function LessonCard({ onMorePress, participationCount = 0, points
     sort: 'latest',
     type: 'SENTENCE',
   });
-  console.log('Current Auth Store:', useAuthStore.getState());
-  console.log('Current userInfo in LessonCard:', userInfo);
+
+  //console.log('posts', posts);
+
+  //console.log('Current Auth Store:', useAuthStore.getState());
+  //console.log('Current userInfo in LessonCard:', userInfo);
 
   // 사용자 데이터 구조 통일
   const userData = userInfo?.user || userInfo;
-  console.log('User data:', userData);
+  //console.log('User data:', userData);
 
   const router = useRouter();
 
@@ -120,7 +115,7 @@ export default function LessonCard({ onMorePress, participationCount = 0, points
             </View>
             <Text className="text-sm text-white">{formattedDate}</Text>
           </View>
-          <Text className="text-sm text-white">Joined: {participationLogs.count} Users</Text>
+          <Text className="text-sm text-white">Joined: {participationLogs?.length} Users</Text>
         </View>
         {/* 한국어 단어 3가지를 가로로 배치 */}
         <View className="mb-4 flex-row space-x-4">
@@ -140,7 +135,7 @@ export default function LessonCard({ onMorePress, participationCount = 0, points
           {postsLoading ? (
             <ActivityIndicator size="small" color="#B227D4" />
           ) : (
-            posts?.data?.map((post: any, index: number) => (
+            posts?.pages[0]?.data?.map((post: any, index: number) => (
               <View key={index} className="mb-2 flex-row items-center justify-between">
                 <Text className="flex-1 text-sm text-[#B227D4]">{post.post_content.content}</Text>
                 <View className="ml-2 flex-row gap-3">
@@ -159,7 +154,7 @@ export default function LessonCard({ onMorePress, participationCount = 0, points
 
           <GrayLine thickness={1} marginTop={5} marginBottom={5} />
           <TouchableOpacity onPress={() => router.push('/feedlist')}>
-            <Text className="text-center font-bold text-[#B227D4]">더보기 . . .</Text>
+            <Text className="text-center font-bold text-[#B227D4]">See More . . .</Text>
           </TouchableOpacity>
         </View>
 

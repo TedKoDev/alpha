@@ -18,7 +18,7 @@ export default function LoginScreen() {
       try {
         await login(email, password);
       } catch (error: any) {
-        console.log('Error details:', error);
+        //console.log('Error details:', error);
         const statusCode = error.response?.status;
         const errorMessage = error.response?.data?.message;
 

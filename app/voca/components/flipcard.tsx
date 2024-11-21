@@ -33,7 +33,7 @@ const FlipCard = ({
   }));
 
   const navigationDetail = () => {
-    console.log('navigationDetail');
+    //console.log('navigationDetail');
     router.push(detailRoute);
   };
 
