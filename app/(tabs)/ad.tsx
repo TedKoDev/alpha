@@ -4,7 +4,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { ScreenContent } from '~/components/ScreenContent';
 
-export default function Home() {
+export default function AdPage() {
   return (
     <>
       <Stack.Screen options={{ title: 'AD' }} />

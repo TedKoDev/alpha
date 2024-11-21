@@ -38,11 +38,6 @@ export default function TabLayout() {
               <Link href="/modal" asChild>
                 <HeaderButton />
               </Link>
-              {/* <Link href="/write" asChild>
-                <TouchableOpacity style={{ marginRight: 15 }}>
-                  <TabBarIcon name="pencil" color="#000" />
-                </TouchableOpacity>
-              </Link> */}
             </>
           ),
         }}

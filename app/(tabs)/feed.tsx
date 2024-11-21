@@ -23,19 +23,6 @@ export default function Feed() {
 
   const [lastRefreshTime, setLastRefreshTime] = useState(Date.now());
 
-  useFocusEffect(
-    useCallback(() => {
-      const currentTime = Date.now();
-      if (
-        currentTime - lastRefreshTime > 30000 ||
-        queryClient.getQueryState(['posts'])?.isInvalidated
-      ) {
-        refetch();
-        setLastRefreshTime(currentTime);
-      }
-    }, [refetch, lastRefreshTime])
-  );
-
   const allPosts = postsData?.pages?.flatMap((page) => page.data) ?? [];
 
   if (isLoading) {

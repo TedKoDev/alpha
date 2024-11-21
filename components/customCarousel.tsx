@@ -29,14 +29,13 @@ const CustomCarousel: React.FC<CustomCarouselProps> = ({
 
   const carouselWidth = width || windowWidth;
   const carouselHeight = height || 170;
-  const navigation = useNavigation();
 
   const handlePress = (item: CarouselItem) => {
     if (item.link) {
       if (item.link.startsWith('http')) {
         //console.log('Open URL:', item.link);
       } else {
-        navigation.navigate(item.link as never);
+        // navigation.navigate(item.link as never);
       }
     }
   };

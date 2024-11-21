@@ -2,15 +2,29 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Stack, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { View, ActivityIndicator, Animated, Image } from 'react-native';
+import {
+  useSharedValue,
+  withSpring,
+  configureReanimatedLogger,
+  ReanimatedLogLevel,
+  withTiming,
+  useAnimatedStyle,
+} from 'react-native-reanimated';
 
 import { useAuthStore } from '../store/authStore';
 
 import '../global.css';
 
+// This is the default configuration
+configureReanimatedLogger({
+  level: ReanimatedLogLevel.warn,
+  strict: false, // Reanimated runs in strict mode by default
+});
+
 export default function RootLayout() {
   const { isAuthenticated, checkAuth } = useAuthStore();
   const router = useRouter();
-  const [logoAnim] = useState(new Animated.Value(0)); // 로고 애니메이션 초기 크기
+  const logoScale = useSharedValue(0);
   const [loading, setLoading] = useState(true); // 로딩 상태
 
   const queryClient = new QueryClient({
@@ -22,6 +36,13 @@ export default function RootLayout() {
     },
   });
 
+  // 애니메이션 스타일 정의
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: logoScale.value }],
+    };
+  });
+
   useEffect(() => {
     const checkAuthentication = async () => {
       await checkAuth(); // 인증 상태 확인
@@ -30,12 +51,10 @@ export default function RootLayout() {
 
     checkAuthentication();
 
-    // 로고 애니메이션 설정
-    Animated.timing(logoAnim, {
-      toValue: 1,
+    // 애니메이션 수정
+    logoScale.value = withSpring(1, {
       duration: 1000,
-      useNativeDriver: true,
-    }).start();
+    });
   }, []);
 
   // 인증되지 않았을 경우 로그인 페이지로 이동
@@ -55,10 +74,9 @@ export default function RootLayout() {
           alignItems: 'center',
           backgroundColor: '#ffffff',
         }}>
-        {/* 로고 애니메이션 */}
         <Animated.Image
-          source={require('../assets/icon.png')} // 로고 이미지
-          style={{ width: 150, height: 150, transform: [{ scale: logoAnim }] }}
+          source={require('../assets/icon.png')}
+          style={[{ width: 150, height: 150 }, animatedStyle]}
         />
       </View>
     );
@@ -74,7 +92,6 @@ export default function RootLayout() {
           options={{
             headerTitle: 'Voca Section',
             headerShown: false,
-            headerBackTitleVisible: false,
             headerTintColor: '#D812DC',
           }} // 이름을 'Voca Section'으로 변경
         />

@@ -38,9 +38,8 @@ export default function EventPage() {
       <Stack.Screen
         options={{
           headerTitle: '상세보기',
-
+          headerBackTitle: '',
           headerBackVisible: true,
-          headerBackTitleVisible: false,
           headerTintColor: '#D812DC',
           headerStyle: {
             backgroundColor: 'white',

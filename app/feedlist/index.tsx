@@ -1,4 +1,7 @@
-import { Text } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { router, Stack } from 'expo-router';
+import React from 'react';
+import { Pressable, Text } from 'react-native';
 
 import ListLayout from '~/components/layouts/ListLayout';
 import { usePosts } from '~/queries/hooks/posts/usePosts';
@@ -21,9 +24,7 @@ export default function FeedList() {
 
   const allPosts = postsData?.pages?.flatMap((page) => page.data) ?? [];
 
-  return isLoading ? (
-    <Text>Loading...</Text>
-  ) : (
+  return (
     <ListLayout
       headerTitle="Today's Vocabulary"
       data={allPosts}
@@ -37,6 +38,7 @@ export default function FeedList() {
       }}
       onRefresh={refetch}
       isRefreshing={isRefetching}
+      isLoading={isLoading}
     />
   );
 }
