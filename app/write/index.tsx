@@ -16,8 +16,12 @@ import {
 import { useAddPost } from '~/queries/hooks/posts/usePosts';
 import { useTopics } from '~/queries/hooks/posts/useTopicsAndCategories';
 import { queryClient } from '~/queries/queryClient';
+import { CreatePostDto } from '~/services/postService';
+import { getPresignedUrlApi, uploadFileToS3 } from '~/services/s3Service';
 
 type PostType = 'SENTENCE' | 'COLUMN' | 'QUESTION' | 'GENERAL';
+
+const MAX_IMAGES = 5; // 최대 이미지 개수 상수 추가
 
 export default function WriteScreen() {
   const [title, setTitle] = useState('');
@@ -28,6 +32,8 @@ export default function WriteScreen() {
   const [images, setImages] = useState<string[]>([]);
   const [points, setPoints] = useState<string>('');
   const [isImageLoading, setIsImageLoading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [selectedImages, setSelectedImages] = useState<{ uri: string; type: string }[]>([]);
 
   // 토픽 목록 가져오기
   const { data: topics = [] } = useTopics();
@@ -48,23 +54,33 @@ export default function WriteScreen() {
 
   const pickImages = async () => {
     try {
-      setIsImageLoading(true); // 이미지 선택 시작 시 로딩 시작
+      if (selectedImages.length >= MAX_IMAGES) {
+        Alert.alert('Notice', 'You can only upload up to 5 images.');
+        return;
+      }
 
+      setIsImageLoading(true);
+
+      const remainingSlots = MAX_IMAGES - selectedImages.length;
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsMultipleSelection: true,
         quality: 1,
+        selectionLimit: remainingSlots, // 남은 슬롯만큼만 선택 가능
       });
 
       if (!result.canceled) {
-        const newImages = result.assets.map((asset) => asset.uri);
-        setImages([...images, ...newImages]);
+        const newImages = result.assets.map((asset) => ({
+          uri: asset.uri,
+          type: asset.mimeType || 'image/jpeg',
+        }));
+        setSelectedImages((prev) => [...prev, ...newImages].slice(0, MAX_IMAGES));
       }
     } catch (error) {
       console.error('Error picking images:', error);
-      Alert.alert('Error', 'Failed to load images');
+      Alert.alert('Error', 'Failed to select images');
     } finally {
-      setIsImageLoading(false); // 이미지 선택 완료 또는 에러 시 로딩 종료
+      setIsImageLoading(false);
     }
   };
 
@@ -79,23 +95,54 @@ export default function WriteScreen() {
         return;
       }
 
-      const postData = {
+      setIsImageLoading(true);
+
+      // 이미지 업로드 처리
+      const uploadedUrls = await Promise.all(
+        selectedImages.map(async (image) => {
+          const extension = image.uri.split('.').pop();
+          const fileName = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${extension}`;
+          const { url } = await getPresignedUrlApi(fileName, image.type);
+          const response = await fetch(image.uri);
+          const blob = await response.blob();
+          await uploadFileToS3(url, blob);
+          return url.split('?')[0];
+        })
+      );
+
+      const mediaData = uploadedUrls.map((url) => ({
+        mediaUrl: url,
+        mediaType: 'IMAGE' as const,
+      }));
+
+      const postData: CreatePostDto = {
         title: title.trim(),
         content: content.trim(),
         type: selectedType,
         categoryId: selectedCategory,
+        media: mediaData.map((m) => ({
+          url: m.mediaUrl,
+          type: m.mediaType,
+        })),
         ...(selectedType === 'QUESTION' && { points: parseInt(points, 10) || 0 }),
       };
 
+      // 게시글 작성
       await addPost.mutateAsync(postData);
 
-      // 포스트 목록 쿼리 무효화
-      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      // 데이터 갱신을 기다림
+      await queryClient.invalidateQueries({ queryKey: ['posts'] });
+      await queryClient.refetchQueries({ queryKey: ['posts'] });
 
-      router.back();
+      // 잠시 대기 후 화면 전환
+      setTimeout(() => {
+        router.back();
+      }, 500);
     } catch (error) {
-      Alert.alert('Error', 'Failed to create post.');
       console.error('Post creation failed:', error);
+      Alert.alert('Error', 'Failed to create post.');
+    } finally {
+      setIsImageLoading(false);
     }
   };
 
@@ -246,25 +293,32 @@ export default function WriteScreen() {
 
         {/* Image attachment */}
         <View className="mb-4">
-          <TouchableOpacity
-            onPress={pickImages}
-            disabled={isImageLoading}
-            className="flex-row items-center rounded-lg bg-gray-100 p-3">
-            {isImageLoading ? (
-              <ActivityIndicator size="small" color="#666" />
-            ) : (
-              <Ionicons name="image-outline" size={24} color="#666" />
-            )}
-            <Text className="ml-2">{isImageLoading ? 'Loading images...' : 'Add Images'}</Text>
-          </TouchableOpacity>
+          <View className="flex-row items-center justify-between">
+            <TouchableOpacity
+              onPress={pickImages}
+              disabled={isImageLoading || selectedImages.length >= MAX_IMAGES}
+              className="flex-row items-center rounded-lg bg-gray-100 p-3">
+              {isImageLoading ? (
+                <ActivityIndicator size="small" color="#666" />
+              ) : (
+                <Ionicons name="image-outline" size={24} color="#666" />
+              )}
+              <Text className="ml-2">{isImageLoading ? 'Loading images...' : 'Add Images'}</Text>
+            </TouchableOpacity>
+
+            {/* 이미지 카운터 추가 */}
+            <Text className="text-sm text-gray-600">
+              {selectedImages.length}/{MAX_IMAGES}
+            </Text>
+          </View>
 
           {/* Image preview */}
           <ScrollView horizontal className="mt-2">
-            {images.map((uri, index) => (
+            {selectedImages.map((image, index) => (
               <View key={index} className="mr-2">
                 <View className="relative">
                   <Image
-                    source={{ uri }}
+                    source={{ uri: image.uri }}
                     className="h-20 w-20 rounded-lg"
                     onLoadStart={() => setIsImageLoading(true)}
                     onLoadEnd={() => setIsImageLoading(false)}
@@ -276,7 +330,9 @@ export default function WriteScreen() {
                   )}
                   <TouchableOpacity
                     className="absolute right-1 top-1 rounded-full bg-black/50 p-1"
-                    onPress={() => setImages(images.filter((_, i) => i !== index))}>
+                    onPress={() =>
+                      setSelectedImages((images) => images.filter((_, i) => i !== index))
+                    }>
                     <Ionicons name="close" size={16} color="white" />
                   </TouchableOpacity>
                 </View>
