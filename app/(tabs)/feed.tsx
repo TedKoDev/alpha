@@ -1,18 +1,12 @@
-import { Feather } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
-import { Stack } from 'expo-router';
 import React, { useState, useCallback } from 'react';
-import { View, TouchableOpacity, Text } from 'react-native';
+import { Text } from 'react-native';
 
-import EventListingItem from '~/components/EventListingItem';
-import InstagramStyleItem from '~/components/InstagramStyleItem';
 import ListLayout from '~/components/layouts/ListLayout';
 import { usePosts } from '~/queries/hooks/posts/usePosts';
 import { queryClient } from '~/queries/queryClient';
 
 export default function Feed() {
-  const [viewMode, setViewMode] = useState<'list' | 'instagram'>('list');
-
   const {
     data: postsData,
     fetchNextPage,
@@ -43,10 +37,6 @@ export default function Feed() {
   );
 
   const allPosts = postsData?.pages?.flatMap((page) => page.data) ?? [];
-
-  const toggleViewMode = useCallback(() => {
-    setViewMode((prev) => (prev === 'list' ? 'instagram' : 'list'));
-  }, []);
 
   if (isLoading) {
     return <Text>Loading...</Text>;

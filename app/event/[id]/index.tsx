@@ -1,18 +1,23 @@
 import { Feather } from '@expo/vector-icons';
 import dayjs from 'dayjs';
+import { Image } from 'expo-image';
 import { useLocalSearchParams, Stack } from 'expo-router';
-import { Text, View, Image, Pressable, ScrollView } from 'react-native';
+import React, { useState } from 'react';
+import { Text, View, Pressable, ScrollView, FlatList, Dimensions, Alert } from 'react-native';
 
 import CommentSection from './components/CommentSection';
 import UserInfo from './components/UserInfo';
 
 import { useGetPostById } from '~/queries/hooks/posts/usePosts';
 
+const { width } = Dimensions.get('window');
+
 export default function EventPage() {
   const { id } = useLocalSearchParams();
   const { data: post, isLoading } = useGetPostById(Number(id));
+  const [activeIndex, setActiveIndex] = useState(0);
 
-  //console.log('post', post);
+  console.log('post', JSON.stringify(post, null, 2));
 
   if (isLoading) {
     return <Text>Loading...</Text>;
@@ -22,22 +27,46 @@ export default function EventPage() {
     return <Text>Post not found</Text>;
   }
 
+  const handleScroll = (event: any) => {
+    const slideSize = event.nativeEvent.layoutMeasurement.width;
+    const index = Math.floor(event.nativeEvent.contentOffset.x / slideSize);
+    setActiveIndex(index);
+  };
+
   return (
     <View className="flex-1 bg-white">
       <Stack.Screen
         options={{
           headerTitle: '상세보기',
+
+          headerBackVisible: true,
           headerBackTitleVisible: false,
-          headerTintColor: 'black',
+          headerTintColor: '#D812DC',
+          headerStyle: {
+            backgroundColor: 'white',
+          },
         }}
       />
 
       <ScrollView className="flex-1">
         <UserInfo
+          post_id={post.post_id}
+          user_id={post.user_id}
           username={post.username}
           createdAt={dayjs(post.created_at).format('YYYY.MM.DD HH:mm')}
           user_level={post.user_level}
           user_profile_picture_url={post.user_profile_picture_url}
+          onDelete={async () => {
+            // 삭제 로직 구현
+            try {
+              // deletePost mutation 호출
+              await deletePostMutation.mutateAsync(post.post_id);
+              // 성공 시 처리
+            } catch (error) {
+              console.error('Failed to delete post:', error);
+              Alert.alert('Error', 'Failed to delete post');
+            }
+          }}
         />
 
         {/* Main Content */}
@@ -47,7 +76,33 @@ export default function EventPage() {
           )}
 
           {post.media && post.media.length > 0 && (
-            <Image source={{ uri: post.media[0] }} className="mb-4 h-72 w-full rounded-lg" />
+            <View>
+              <FlatList
+                data={post.media}
+                horizontal
+                pagingEnabled
+                showsHorizontalScrollIndicator={false}
+                onScroll={handleScroll}
+                renderItem={({ item }) => (
+                  <Image
+                    source={{ uri: item.media_url }}
+                    style={{ width, height: 300 }}
+                    className="mb-4 rounded-lg"
+                  />
+                )}
+                keyExtractor={(item) => item.media_id.toString()}
+              />
+              <View className="mt-2 flex-row justify-center">
+                {post.media.map((_: any, index: any) => (
+                  <View
+                    key={index}
+                    className={`mx-1 h-2 w-2 rounded-full ${
+                      index === activeIndex ? 'bg-purple-500' : 'bg-gray-300'
+                    }`}
+                  />
+                ))}
+              </View>
+            </View>
           )}
 
           {post.post_content.content && (

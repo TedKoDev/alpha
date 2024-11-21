@@ -57,10 +57,32 @@ export const getUserInfoApi = async (token: string) => {
   }
 };
 
+export const updateUserProfileApi = async (token: string, updateData: any) => {
+  try {
+    // console.log('API request data:', updateData);
+    const response = await api.post('/users/update-profile', updateData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    // console.log('API response:', response.data);
+    return response.data;
+  } catch (error: any) {
+    console.error('Update profile API error:', {
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message,
+    });
+    throw error;
+  }
+};
+
 export const authService = {
   checkEmail,
   checkName,
   loginApi,
   registerApi,
   getUserInfoApi,
+  updateUserProfileApi,
 };

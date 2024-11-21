@@ -13,6 +13,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 
+import { useUserInfo } from '~/queries/hooks/auth/useUserinfo';
 import { useAddPost } from '~/queries/hooks/posts/usePosts';
 import { useTopics } from '~/queries/hooks/posts/useTopicsAndCategories';
 import { queryClient } from '~/queries/queryClient';
@@ -111,8 +112,8 @@ export default function WriteScreen() {
       );
 
       const mediaData = uploadedUrls.map((url) => ({
-        mediaUrl: url,
-        mediaType: 'IMAGE' as const,
+        url,
+        type: 'IMAGE' as const,
       }));
 
       const postData: CreatePostDto = {
@@ -120,10 +121,7 @@ export default function WriteScreen() {
         content: content.trim(),
         type: selectedType,
         categoryId: selectedCategory,
-        media: mediaData.map((m) => ({
-          url: m.mediaUrl,
-          type: m.mediaType,
-        })),
+        media: mediaData,
         ...(selectedType === 'QUESTION' && { points: parseInt(points, 10) || 0 }),
       };
 
@@ -162,6 +160,10 @@ export default function WriteScreen() {
       setSelectedType(type);
     }
   };
+
+  const { data: userInfo } = useUserInfo();
+
+  const isPointsValid = !points || parseInt(points, 10) <= (userInfo?.points || 0);
 
   return (
     <>
@@ -274,10 +276,18 @@ export default function WriteScreen() {
         {/* Points input for Question type */}
         {selectedType === 'QUESTION' && (
           <View className="mb-4">
-            <Text className="mb-2 text-gray-600">Set Points</Text>
+            <View className="mb-2 flex-row items-center justify-between">
+              <Text className="text-gray-600">Set Points</Text>
+              <Text className="text-gray-600">
+                Your points:{' '}
+                <Text className="font-bold text-purple-600">{userInfo?.points || 0}P</Text>
+              </Text>
+            </View>
             <View className="flex-row items-center">
               <TextInput
-                className="flex-1 rounded-lg border border-gray-300 p-3"
+                className={`flex-1 rounded-lg border ${
+                  isPointsValid ? 'border-gray-300' : 'border-red-500'
+                } p-3`}
                 placeholder="Enter points"
                 value={points}
                 onChangeText={setPoints}
@@ -285,6 +295,9 @@ export default function WriteScreen() {
               />
               <Text className="ml-2 text-gray-600">P</Text>
             </View>
+            {!isPointsValid && (
+              <Text className="mt-1 text-sm text-red-500">You don't have enough points</Text>
+            )}
             <Text className="mt-1 text-sm text-gray-500">
               * Points will be awarded to the person who answers your question
             </Text>

@@ -34,7 +34,8 @@ export default function LessonCard({ onMorePress, participationCount = 0, points
     type: 'SENTENCE',
   });
 
-  //console.log('posts', posts);
+  console.log('posts', posts);
+  console.log('participationLogs', participationLogs);
 
   //console.log('Current Auth Store:', useAuthStore.getState());
   //console.log('Current userInfo in LessonCard:', userInfo);
@@ -115,7 +116,7 @@ export default function LessonCard({ onMorePress, participationCount = 0, points
             </View>
             <Text className="text-sm text-white">{formattedDate}</Text>
           </View>
-          <Text className="text-sm text-white">Joined: {participationLogs?.length} Users</Text>
+          <Text className="text-sm text-white">Joined: {participationLogs?.count} Users</Text>
         </View>
         {/* 한국어 단어 3가지를 가로로 배치 */}
         <View className="mb-4 flex-row space-x-4">

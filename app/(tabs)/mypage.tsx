@@ -15,54 +15,99 @@ import {
   Pressable,
 } from 'react-native';
 
+import { useUpdateProfile } from '~/queries/hooks/auth/useUpdateProfile';
+import { getPresignedUrlApi, uploadFileToS3 } from '~/services/s3Service';
 import { useAuthStore } from '~/store/authStore';
 
 export default function MyPage() {
-  const { logout, userInfo, updateUserInfo } = useAuthStore();
+  const { logout, userInfo } = useAuthStore();
+  const updateProfileMutation = useUpdateProfile();
 
   console.log(userInfo);
   const [modalVisible, setModalVisible] = useState(false);
   const [editedProfile, setEditedProfile] = useState({
+    userId: userInfo?.user_id,
     username: userInfo?.username || '',
-    email: userInfo?.email || '',
     bio: userInfo?.bio || '',
-    profile_picture_url: userInfo?.profile_picture_url || '',
+    profilePictureUrl: userInfo?.profile_picture_url || '',
   });
 
   const pickImage = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
-    if (status !== 'granted') {
-      Alert.alert(
-        'Permission needed',
-        'Please grant camera roll permissions to change your profile picture.'
-      );
-      return;
-    }
+      if (status !== 'granted') {
+        Alert.alert(
+          'Permission needed',
+          'Please grant camera roll permissions to change your profile picture.'
+        );
+        return;
+      }
 
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 1,
-    });
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 1,
+      });
 
-    if (!result.canceled) {
-      setEditedProfile((prev) => ({
-        ...prev,
-        profile_picture_url: result.assets[0].uri,
-      }));
+      if (!result.canceled) {
+        const image = result.assets[0];
+        const extension = image.uri.split('.').pop();
+        const fileName = `profile-images/${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${extension}`;
+
+        try {
+          const { url } = await getPresignedUrlApi(fileName, image.type || 'image/jpeg');
+          const response = await fetch(image.uri);
+          const blob = await response.blob();
+          await uploadFileToS3(url, blob);
+
+          // S3에 업로드된 이미지 URL (서명 제거)
+          const imageUrl = url.split('?')[0];
+
+          setEditedProfile((prev) => ({
+            ...prev,
+            profilePictureUrl: imageUrl,
+          }));
+        } catch (error) {
+          console.error('Failed to upload image:', error);
+          Alert.alert('Error', 'Failed to upload profile image');
+        }
+      }
+    } catch (error) {
+      console.error('Error picking image:', error);
+      Alert.alert('Error', 'Failed to select image');
     }
   };
 
   const handleUpdateProfile = async () => {
     try {
-      // API call to update profile would go here
-      await updateUserInfo(editedProfile);
+      if (!userInfo?.user_id) {
+        throw new Error('User ID is not available');
+      }
+
+      const updateData = {
+        userId: Number(userInfo.user_id),
+        username: editedProfile.username.trim(),
+        bio: editedProfile.bio?.trim() || '',
+        profilePictureUrl: editedProfile.profilePictureUrl || '',
+      };
+
+      console.log('Updating profile with:', updateData);
+      await updateProfileMutation.mutateAsync(updateData);
       setModalVisible(false);
       Alert.alert('Success', 'Profile updated successfully');
-    } catch (error) {
-      Alert.alert('Error', 'Failed to update profile');
+    } catch (error: any) {
+      console.error('Profile update error:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+      });
+
+      const errorMessage =
+        error.response?.data?.message || error.message || 'Failed to update profile';
+
+      Alert.alert('Error', errorMessage);
     }
   };
 
@@ -165,7 +210,7 @@ export default function MyPage() {
               <View style={styles.profileImageSection}>
                 <Image
                   source={{
-                    uri: editedProfile.profile_picture_url || 'https://via.placeholder.com/100',
+                    uri: editedProfile.profilePictureUrl || 'https://via.placeholder.com/100',
                   }}
                   style={styles.modalProfileImage}
                 />
@@ -187,11 +232,10 @@ export default function MyPage() {
               <View style={styles.inputContainer}>
                 <Text style={styles.inputLabel}>Email</Text>
                 <TextInput
-                  style={styles.input}
-                  value={editedProfile.email}
-                  onChangeText={(text) => setEditedProfile((prev) => ({ ...prev, email: text }))}
-                  placeholder="Enter email"
-                  keyboardType="email-address"
+                  style={[styles.input, { backgroundColor: '#f0f0f0' }]}
+                  value={userInfo?.email}
+                  editable={false}
+                  placeholder="Email"
                 />
               </View>
 

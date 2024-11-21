@@ -1,7 +1,8 @@
 import Feather from '@expo/vector-icons/Feather';
 import dayjs from 'dayjs';
+import { Image } from 'expo-image';
 import { Link } from 'expo-router';
-import { View, Text, Image, Pressable } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
 
 export default function EventListItem({ event }: any) {
   return (
@@ -10,10 +11,10 @@ export default function EventListItem({ event }: any) {
         <View className="mb-2 flex-row items-center">
           <View className="flex-1 flex-row items-center">
             <Image
-              source={{
-                uri: event.user_profile_picture_url || 'https://via.placeholder.com/32',
-              }}
-              className="h-6 w-6 rounded-full"
+              source={{ uri: event.user_profile_picture_url || 'https://via.placeholder.com/32' }}
+              style={{ width: 24, height: 24, borderRadius: 12 }}
+              contentFit="cover"
+              transition={200}
             />
             <Text className="ml-2 text-sm text-gray-500">{event.username}</Text>
             <Text className="ml-2 text-xs text-orange-400">Lv {event.user_level}</Text>
@@ -34,12 +35,18 @@ export default function EventListItem({ event }: any) {
           </View>
 
           {event.media?.length > 0 && (
-            <View className="flex-1">
+            <View className="relative flex-1">
               <Image
-                source={{ uri: event.media[0] }}
-                className="h-20 w-full rounded-md"
-                resizeMode="cover"
+                source={{ uri: event.media[0].media_url }}
+                style={{ width: '100%', height: 80, borderRadius: 6 }}
+                contentFit="cover"
+                transition={200}
               />
+              {event.media.length > 1 && (
+                <View className="absolute bottom-2 right-2 rounded-md bg-black/50 px-2 py-1">
+                  <Text className="text-xs text-white">+{event.media.length - 1}</Text>
+                </View>
+              )}
             </View>
           )}
         </View>

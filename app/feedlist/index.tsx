@@ -25,9 +25,11 @@ export default function FeedList() {
     <Text>Loading...</Text>
   ) : (
     <ListLayout
-      headerTitle="커뮤니티"
+      headerTitle="Today's Vocabulary"
       data={allPosts}
-      showViewToggle
+      showViewToggle={false}
+      showWriteButton
+      writeRoute="/write/with-words"
       onLoadMore={() => {
         if (hasNextPage && !isFetchingNextPage) {
           fetchNextPage();

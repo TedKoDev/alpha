@@ -4,6 +4,11 @@ import React from 'react';
 import { getUserInfoApi } from '~/services/authService';
 import { useAuthStore } from '~/store/authStore';
 
+interface UserInfo {
+  points: number;
+  // ... 다른 필요한 사용자 정보 필드들
+}
+
 export function useUserInfo() {
   const token = useAuthStore((state) => state.userToken);
   const setUserInfo = useAuthStore((state) => state.setUserInfo);
@@ -25,7 +30,7 @@ export function useUserInfo() {
     fetchUserInfo();
   }, [token]);
 
-  return useQuery<any, Error>({
+  return useQuery<UserInfo>({
     queryKey: ['userInfo'],
     queryFn: async () => {
       if (!token) throw new Error('No token available');
@@ -35,7 +40,6 @@ export function useUserInfo() {
     },
     enabled: !!token,
     staleTime: 0,
-    cacheTime: 0,
   });
 }
 

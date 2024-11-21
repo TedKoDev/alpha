@@ -1,14 +1,8 @@
 import { Ionicons, Feather } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { Stack, useRouter } from 'expo-router';
-import React, { useState } from 'react';
-import {
-  TouchableOpacity,
-  View,
-  FlatList,
-  Text,
-  RefreshControl,
-  ActivityIndicator,
-} from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { TouchableOpacity, View, FlatList, RefreshControl, ActivityIndicator } from 'react-native';
 
 import EventListingItem from '~/components/EventListingItem';
 import InstagramStyleItem from '~/components/InstagramStyleItem';
@@ -23,6 +17,7 @@ type ListLayoutProps = {
   isRefreshing?: boolean;
   hideButton?: boolean;
   showWriteButton?: boolean;
+  writeRoute?: string;
 };
 
 export default function ListLayout({
@@ -35,19 +30,49 @@ export default function ListLayout({
   isRefreshing = false,
   hideButton = false,
   showWriteButton = false,
+  writeRoute = '/write',
 }: ListLayoutProps) {
   const router = useRouter();
   const [viewMode, setViewMode] = useState<'list' | 'instagram'>('list');
 
+  // console.log('data', JSON.stringify(data, null, 2));
+
+  useEffect(() => {
+    if (data?.length) {
+      const imageUrls = data.reduce((acc: string[], item) => {
+        if (item.media?.length) {
+          acc.push(item.media[0].media_url);
+        }
+        if (item.user_profile_picture_url) {
+          acc.push(item.user_profile_picture_url);
+        }
+        return acc;
+      }, []);
+
+      Image.prefetch(imageUrls);
+    }
+  }, [data]);
+
   const toggleViewMode = () => {
-    setViewMode((prev) => (prev === 'list' ? 'instagram' : 'list'));
+    const nextMode = viewMode === 'list' ? 'instagram' : 'list';
+    if (data?.length) {
+      const imageUrls = data.reduce((acc: string[], item) => {
+        if (item.media?.length) {
+          acc.push(item.media[0].media_url);
+        }
+        return acc;
+      }, []);
+
+      Image.prefetch(imageUrls);
+    }
+    setViewMode(nextMode);
   };
 
   const HeaderRight = () => {
     return (
       <View className="flex-row items-center">
         {showWriteButton && (
-          <TouchableOpacity onPress={() => router.push('/write')} className="mr-4">
+          <TouchableOpacity onPress={() => router.push(writeRoute as any)} className="mr-4">
             <Feather name="edit" size={24} color="#B227D4" />
           </TouchableOpacity>
         )}
@@ -62,18 +87,20 @@ export default function ListLayout({
 
   return (
     <View style={{ flex: 1 }}>
-      <Stack.Screen
-        options={{
-          title: headerTitle,
-          headerLeft: () =>
-            hideButton ? null : (
-              <TouchableOpacity onPress={() => router.back()} className="ml-4">
-                <Ionicons name="chevron-back" size={24} color="#B227D4" />
-              </TouchableOpacity>
-            ),
-          headerRight: HeaderRight,
-        }}
-      />
+      {!isLoading && (
+        <Stack.Screen
+          options={{
+            title: headerTitle,
+            headerLeft: () =>
+              hideButton ? null : (
+                <TouchableOpacity onPress={() => router.back()} className="ml-4">
+                  <Ionicons name="chevron-back" size={24} color="#B227D4" />
+                </TouchableOpacity>
+              ),
+            headerRight: HeaderRight,
+          }}
+        />
+      )}
       <FlatList
         data={data}
         key={viewMode}
