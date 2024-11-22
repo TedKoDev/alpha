@@ -21,7 +21,7 @@ const MenuItem: React.FC<MenuItemProps> = ({ color, label, route, icon: Icon }) 
   const router = useRouter();
 
   const handlePress = () => {
-    router.push(route as any); // 클릭 시 라우터 이동
+    router.push(route as any);
   };
 
   return (
@@ -29,24 +29,29 @@ const MenuItem: React.FC<MenuItemProps> = ({ color, label, route, icon: Icon }) 
       onPress={handlePress}
       style={{
         alignItems: 'center',
-        marginHorizontal: 15,
+        marginHorizontal: 8,
         marginTop: 20,
       }}>
-      {/* 아이콘과 배경색 */}
       <View
         style={{
           backgroundColor: color,
-          width: 50, // 아이콘 배경 가로 크기
-          height: 50, // 아이콘 배경 세로 크기
-          borderRadius: 14, // 배경의 둥근 모서리
+          width: 45,
+          height: 45,
+          borderRadius: 12,
           justifyContent: 'center',
           alignItems: 'center',
         }}>
-        <Icon width={35} height={35} />
+        <Icon width={30} height={30} />
       </View>
-      {/* 라벨 */}
-      <Text style={{ color: '#000000', fontSize: 14, marginTop: 8 }}>{label}</Text>
-      {/* 라벨 크기 */}
+      <Text
+        style={{
+          color: '#000000',
+          fontSize: 12,
+          marginTop: 6,
+          textAlign: 'center',
+        }}>
+        {label}
+      </Text>
     </TouchableOpacity>
   );
 };
@@ -55,13 +60,19 @@ const MainMenu = () => {
   const menuItems = [
     { color: '#ADD8FF', label: 'VOCA', route: '/voca', icon: VocaIcon },
     { color: '#D1B3FF', label: 'TOPIK', route: '/topik', icon: TopicTestIcon },
-    // { color: '#FFCCFF', label: 'Edu', route: '/edu', icon: SchoolIcon },
-    // { color: '#FFEB3B', label: 'JOB', route: 'EmotionalStay', icon: JobIcon },
-    // { color: '#00FFCC', label: 'AGENCY', route: 'Activity', icon: TravelIcon },
+    { color: '#FFCCFF', label: 'Edu', route: '/edu', icon: SchoolIcon },
+    { color: '#FFEB3B', label: 'JOB', route: 'EmotionalStay', icon: JobIcon },
+    { color: '#00FFCC', label: 'AGENCY', route: 'Activity', icon: TravelIcon },
   ];
 
   return (
-    <View style={{ flexDirection: 'row', justifyContent: 'space-around', paddingHorizontal: 10 }}>
+    <View
+      style={{
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        paddingHorizontal: 16,
+        width: '100%',
+      }}>
       {menuItems.map((item, index) => (
         <MenuItem
           key={index}

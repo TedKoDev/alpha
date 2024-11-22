@@ -5,8 +5,8 @@ import { useAuthStore } from '../store/authStore';
 export type PostType = 'SENTENCE' | 'GENERAL' | 'COLUMN' | 'QUESTION';
 
 export interface CreateMediaDto {
-  url: string;
-  type: 'IMAGE' | 'VIDEO';
+  mediaUrl: string;
+  mediaType: 'IMAGE' | 'VIDEO';
 }
 
 export interface CreatePostDto {
@@ -26,6 +26,11 @@ export interface PostParams {
   type?: PostType;
 }
 
+export interface MediaDto {
+  media_id?: number;
+  mediaUrl: string; // snake_case -> camelCase
+  mediaType: 'IMAGE' | 'VIDEO'; // snake_case -> camelCase
+}
 // GET API
 export const getPostApi = async (params?: PostParams) => {
   try {
@@ -55,7 +60,7 @@ export const addPostApi = async (createPostDto: CreatePostDto) => {
 
     if (!token) {
     }
-    //console.log('createPostDto', createPostDto);
+    console.log('createPostDto', createPostDto);
 
     const response = await api.post('/posts/', createPostDto, {
       headers: {
@@ -143,3 +148,94 @@ export const getCategoriesByTopicApi = async (topicId: number) => {
     throw error;
   }
 };
+
+export interface MediaDto {
+  media_id?: number;
+  mediaUrl: string;
+  mediaType: 'IMAGE' | 'VIDEO';
+}
+
+export interface UpdatePostDto {
+  title?: string;
+  content?: string;
+  type?: string;
+  points?: number;
+  categoryId?: number;
+  media?: MediaDto[];
+  tags?: string[];
+}
+
+export class PostService {
+  private handleError(error: any) {
+    console.error('API Error:', error);
+    if (error.response) {
+      // 서버 응답의 자세한 에러 메시지 출력
+      console.error('Error Response:', error.response.data);
+      console.error('Error Status:', error.response.status);
+      console.error('Error Headers:', error.response.headers);
+      throw new Error(error.response.data.message || 'API request failed');
+    }
+    throw error;
+  }
+
+  async updatePost(postId: number, updateData: UpdatePostDto) {
+    try {
+      const token = useAuthStore.getState().userToken;
+      if (!token) {
+        throw new Error('No token found');
+      }
+
+      // media 배열이 있는 경우 필드 순서 정렬
+      const transformedData = {
+        ...updateData,
+        media: updateData.media?.map((item) => ({
+          mediaType: item.mediaType, // 순서 변경
+          mediaUrl: item.mediaUrl, // 순서 변경
+          media_id: item.media_id, // 순서 변경
+        })),
+      };
+
+      // undefined 필드 제거 및 정렬된 객체 생성
+      const payload = Object.keys(transformedData)
+        .sort()
+        .reduce((obj, key) => {
+          if (transformedData[key] !== undefined) {
+            obj[key] = transformedData[key];
+          }
+          return obj;
+        }, {});
+
+      console.log('Final Payload:', JSON.stringify(payload, null, 2));
+
+      const response = await api.patch(`/posts/${postId}`, payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      return response.data;
+    } catch (error) {
+      this.handleError(error);
+    }
+  }
+
+  async deletePost(postId: number) {
+    try {
+      const token = useAuthStore.getState().userToken;
+      if (!token) {
+        throw new Error('No token found');
+      }
+
+      const response = await api.delete(`/posts/${postId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      this.handleError(error);
+    }
+  }
+}
+
+export const postService = new PostService();

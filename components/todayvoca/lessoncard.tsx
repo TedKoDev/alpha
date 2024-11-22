@@ -154,7 +154,7 @@ export default function LessonCard({ onMorePress, participationCount = 0, points
           )}
 
           <GrayLine thickness={1} marginTop={5} marginBottom={5} />
-          <TouchableOpacity onPress={() => router.push('/feedlist')}>
+          <TouchableOpacity onPress={() => router.push('/(stack)/feedlist')}>
             <Text className="text-center font-bold text-[#B227D4]">See More . . .</Text>
           </TouchableOpacity>
         </View>

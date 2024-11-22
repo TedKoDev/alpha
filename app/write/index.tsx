@@ -17,7 +17,7 @@ import { useUserInfo } from '~/queries/hooks/auth/useUserinfo';
 import { useAddPost } from '~/queries/hooks/posts/usePosts';
 import { useTopics } from '~/queries/hooks/posts/useTopicsAndCategories';
 import { queryClient } from '~/queries/queryClient';
-import { CreatePostDto } from '~/services/postService';
+import { CreateMediaDto, CreatePostDto } from '~/services/postService';
 import { getPresignedUrlApi, uploadFileToS3 } from '~/services/s3Service';
 
 type PostType = 'SENTENCE' | 'COLUMN' | 'QUESTION' | 'GENERAL';
@@ -112,8 +112,8 @@ export default function WriteScreen() {
       );
 
       const mediaData = uploadedUrls.map((url) => ({
-        url,
-        type: 'IMAGE' as const,
+        mediaUrl: url,
+        mediaType: 'IMAGE',
       }));
 
       const postData: CreatePostDto = {
@@ -121,7 +121,7 @@ export default function WriteScreen() {
         content: content.trim(),
         type: selectedType,
         categoryId: selectedCategory,
-        media: mediaData,
+        media: mediaData as CreateMediaDto[],
         ...(selectedType === 'QUESTION' && { points: parseInt(points, 10) || 0 }),
       };
 
@@ -175,7 +175,6 @@ export default function WriteScreen() {
           headerTitleAlign: 'center',
 
           headerBackVisible: true,
-          headerBackTitleVisible: false,
           headerTintColor: '#D812DC',
           headerStyle: {
             backgroundColor: 'white',

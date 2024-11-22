@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Stack, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { View, ActivityIndicator, Animated, Image } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import {
   useSharedValue,
   withSpring,
@@ -10,6 +11,7 @@ import {
   withTiming,
   useAnimatedStyle,
 } from 'react-native-reanimated';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 
 import { useAuthStore } from '../store/authStore';
 
@@ -67,37 +69,43 @@ export default function RootLayout() {
 
   if (loading || isAuthenticated === null) {
     return (
-      <View
-        style={{
-          flex: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
-          backgroundColor: '#ffffff',
-        }}>
-        <Animated.Image
-          source={require('../assets/icon.png')}
-          style={[{ width: 150, height: 150 }, animatedStyle]}
-        />
-      </View>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: '#ffffff',
+          }}>
+          <Animated.Image
+            source={require('../assets/icon.png')}
+            style={[{ width: 150, height: 150 }, animatedStyle]}
+          />
+        </View>
+      </GestureHandlerRootView>
     );
   }
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <Stack>
-        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="voca"
-          options={{
-            headerTitle: 'Voca Section',
-            headerShown: false,
-            headerTintColor: '#D812DC',
-          }} // 이름을 'Voca Section'으로 변경
-        />
-
-        <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
-      </Stack>
-    </QueryClientProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <BottomSheetModalProvider>
+        <QueryClientProvider client={queryClient}>
+          <Stack>
+            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="(stack)" options={{ headerShown: false }} />
+            <Stack.Screen
+              name="voca"
+              options={{
+                headerTitle: 'Voca Section',
+                headerShown: false,
+                headerTintColor: '#D812DC',
+              }}
+            />
+            <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+          </Stack>
+        </QueryClientProvider>
+      </BottomSheetModalProvider>
+    </GestureHandlerRootView>
   );
 }

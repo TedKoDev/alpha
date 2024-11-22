@@ -1,7 +1,14 @@
-import { useMutation, useInfiniteQuery, useQuery } from '@tanstack/react-query';
+import { useMutation, useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { queryClient } from '~/queries/queryClient';
-import { addPostApi, CreatePostDto, getPostApi, getPostByIdApi } from '~/services/postService';
+import {
+  addPostApi,
+  CreatePostDto,
+  getPostApi,
+  getPostByIdApi,
+  postService,
+  UpdatePostDto,
+} from '~/services/postService';
 
 interface Post {
   post_id: number;
@@ -97,3 +104,29 @@ export function useAddPost() {
     },
   });
 }
+
+// Update Post Hook
+export const useUpdatePost = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ postId, ...updateData }: UpdatePostDto & { postId: number }) =>
+      postService.updatePost(postId, updateData),
+    onSuccess: () => {
+      // 포스트 목록과 상세 데이터 갱신
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+    },
+  });
+};
+
+// Delete Post Hook
+export const useDeletePost = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (postId: number) => postService.deletePost(postId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+    },
+  });
+};
