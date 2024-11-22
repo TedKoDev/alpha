@@ -191,7 +191,7 @@ export class PostService {
         media: updateData.media?.map((item) => ({
           mediaType: item.mediaType, // 순서 변경
           mediaUrl: item.mediaUrl, // 순서 변경
-          media_id: item.media_id, // 순서 변경
+          mediaId: item.media_id, // 순서 변경
         })),
       };
 
