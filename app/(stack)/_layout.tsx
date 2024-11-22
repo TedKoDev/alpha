@@ -1,6 +1,6 @@
-import { Feather } from '@expo/vector-icons';
+import { Feather, Ionicons } from '@expo/vector-icons';
 import { Stack, useRouter } from 'expo-router';
-import { View } from 'react-native';
+import { Platform, TouchableOpacity, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 
 export default function StackLayout() {
@@ -17,6 +17,12 @@ export default function StackLayout() {
       handlePress();
     });
 
+  const backTap = Gesture.Tap()
+    .runOnJS(true)
+    .onEnd(() => {
+      router.back();
+    });
+
   return (
     <Stack
       screenOptions={{
@@ -29,6 +35,13 @@ export default function StackLayout() {
         },
         headerTitleAlign: 'center',
         headerTintColor: '#B227D4',
+        headerLeft: () => (
+          <GestureDetector gesture={backTap}>
+            <View>
+              <Ionicons name="chevron-back" size={24} color="#B227D4" />
+            </View>
+          </GestureDetector>
+        ),
         headerRight: () => (
           <View
             style={{

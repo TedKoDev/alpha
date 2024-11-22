@@ -16,21 +16,6 @@ import EventListingItem from '~/components/EventListingItem';
 import { usePosts } from '~/queries/hooks/posts/usePosts';
 
 export default function FeedList() {
-  const router = useRouter();
-  const HeaderRight = () => {
-    return (
-      <View className="flex-row items-center">
-        <TouchableOpacity
-          onPress={() => {
-            console.log('write button pressed');
-            // router.push(writeRoute as any);
-          }}
-          className="mr-4">
-          <Feather name="edit" size={24} color="#B227D4" />
-        </TouchableOpacity>
-      </View>
-    );
-  };
   const {
     data: postsData,
     fetchNextPage,

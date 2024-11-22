@@ -13,7 +13,16 @@ import {
   Modal,
   TextInput,
   Pressable,
+  SafeAreaView,
+  ScrollView,
 } from 'react-native';
+import { GestureDetector, Gesture } from 'react-native-gesture-handler';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  runOnJS,
+} from 'react-native-reanimated';
 
 import { useUpdateProfile } from '~/queries/hooks/auth/useUpdateProfile';
 import { getPresignedUrlApi, uploadFileToS3 } from '~/services/s3Service';
@@ -111,163 +120,205 @@ export default function MyPage() {
     }
   };
 
+  const translateY = useSharedValue(0);
+
+  const gesture = Gesture.Pan()
+    .onUpdate((event) => {
+      if (event.translationY > 0) {
+        // 아래로 드래그할 때만
+        translateY.value = event.translationY;
+      }
+    })
+    .onEnd((event) => {
+      if (event.translationY > 150) {
+        // 일정 거리 이상 드래그하면
+        runOnJS(setModalVisible)(false);
+      }
+      translateY.value = withSpring(0); // 원위치로
+    });
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateY: translateY.value }],
+    };
+  });
+
   return (
-    <>
+    <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
       <Stack.Screen options={{ title: 'My Page' }} />
-      <View style={styles.container}>
-        {/* Profile Section */}
-        <View style={styles.profileSection}>
-          <Image
-            source={{ uri: userInfo?.profile_picture_url || 'https://via.placeholder.com/100' }}
-            style={styles.profileImage}
-          />
-          <View style={styles.userInfo}>
-            <Text style={styles.userName}>{userInfo?.username || 'Student'}</Text>
-            <Text style={styles.rankText}>Lv {userInfo?.level || 1}</Text>
-            <Text style={styles.userEmail}>{userInfo?.email}</Text>
+      <ScrollView
+        style={styles.container}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}>
+        <View style={styles.contentContainer}>
+          {/* Profile Section */}
+          <View style={styles.profileSection}>
+            <Image
+              source={{ uri: userInfo?.profile_picture_url || 'https://via.placeholder.com/100' }}
+              style={styles.profileImage}
+            />
+            <View style={styles.userInfo}>
+              <Text style={styles.userName}>{userInfo?.username || 'Student'}</Text>
+              <Text style={styles.rankText}>Lv {userInfo?.level || 1}</Text>
+              <Text style={styles.userEmail}>{userInfo?.email}</Text>
+            </View>
+            <TouchableOpacity
+              style={styles.editProfileButton}
+              onPress={() => setModalVisible(true)}>
+              <Text style={styles.editProfileText}>Edit Profile</Text>
+            </TouchableOpacity>
           </View>
-          <TouchableOpacity style={styles.editProfileButton} onPress={() => setModalVisible(true)}>
-            <Text style={styles.editProfileText}>Edit Profile</Text>
+
+          {/* Points Section */}
+          <TouchableOpacity style={styles.pointsSection}>
+            <Text style={styles.pointsText}>🎯 Learning Points</Text>
+            <Text style={styles.pointsCount}>{userInfo?.points || 0} pts</Text>
           </TouchableOpacity>
-        </View>
 
-        {/* Points Section */}
-        <TouchableOpacity style={styles.pointsSection}>
-          <Text style={styles.pointsText}>🎯 Learning Points</Text>
-          <Text style={styles.pointsCount}>{userInfo?.points || 0} pts</Text>
-        </TouchableOpacity>
-
-        {/* Activity Section */}
-        <View style={styles.activitySection}>
-          <View style={styles.activityItem}>
-            <Text style={styles.activityNumber}>{userInfo?.stats?.postCount || 0}</Text>
-            <Text style={styles.activityLabel}>Posts</Text>
-          </View>
-          <View style={styles.activityItem}>
-            <Text style={styles.activityNumber}>{userInfo?.stats?.commentCount || 0}</Text>
-            <Text style={styles.activityLabel}>Comments</Text>
-          </View>
-          <View style={styles.activityItem}>
-            <Text style={styles.activityNumber}>{userInfo?.stats?.followersCount || 0}</Text>
-            <Text style={styles.activityLabel}>Followers</Text>
-          </View>
-          <View style={styles.activityItem}>
-            <Text style={styles.activityNumber}>{userInfo?.stats?.followingCount || 0}</Text>
-            <Text style={styles.activityLabel}>Following</Text>
-          </View>
-        </View>
-
-        {/* Learning Section */}
-        <View style={styles.tradeSection}>
-          <TouchableOpacity style={styles.tradeItem}>
-            <FontAwesome5 name="book" size={24} color="black" />
-            <Text style={styles.tradeLabel}>My Courses</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.tradeItem}>
-            <FontAwesome5 name="history" size={24} color="black" />
-            <Text style={styles.tradeLabel}>Learning History</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.tradeItem}>
-            <FontAwesome5 name="comments" size={24} color="black" />
-            <Text style={styles.tradeLabel}>Messages</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.tradeItem}>
-            <FontAwesome5 name="bookmark" size={24} color="black" />
-            <Text style={styles.tradeLabel}>Bookmarks</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Other Section */}
-        <View style={styles.otherSection}>
-          <TouchableOpacity style={styles.otherItem}>
-            <FontAwesome5 name="bullhorn" size={24} color="black" />
-            <Text style={styles.otherLabel}>Announcements</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.otherItem}>
-            <FontAwesome5 name="headset" size={24} color="black" />
-            <Text style={styles.otherLabel}>Support</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.otherItem}>
-            <FontAwesome5 name="user-plus" size={24} color="black" />
-            <Text style={styles.otherLabel}>Become a Teacher</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Logout Button */}
-        <Button title="Logout" onPress={logout} color="#FF0000" />
-
-        {/* Edit Profile Modal */}
-        <Modal
-          animationType="slide"
-          transparent
-          visible={modalVisible}
-          onRequestClose={() => setModalVisible(false)}>
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Edit Profile</Text>
-
-              {/* Profile Image Section */}
-              <View style={styles.profileImageSection}>
-                <Image
-                  source={{
-                    uri: editedProfile.profilePictureUrl || 'https://via.placeholder.com/100',
-                  }}
-                  style={styles.modalProfileImage}
-                />
-                <TouchableOpacity style={styles.changePhotoButton} onPress={pickImage}>
-                  <Text style={styles.changePhotoText}>Change Photo</Text>
-                </TouchableOpacity>
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Username</Text>
-                <TextInput
-                  style={styles.input}
-                  value={editedProfile.username}
-                  onChangeText={(text) => setEditedProfile((prev) => ({ ...prev, username: text }))}
-                  placeholder="Enter username"
-                />
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Email</Text>
-                <TextInput
-                  style={[styles.input, { backgroundColor: '#f0f0f0' }]}
-                  value={userInfo?.email}
-                  editable={false}
-                  placeholder="Email"
-                />
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Bio</Text>
-                <TextInput
-                  style={[styles.input, styles.bioInput]}
-                  value={editedProfile.bio}
-                  onChangeText={(text) => setEditedProfile((prev) => ({ ...prev, bio: text }))}
-                  placeholder="Enter bio"
-                  multiline
-                  numberOfLines={4}
-                />
-              </View>
-
-              <View style={styles.modalButtons}>
-                <Pressable
-                  style={[styles.modalButton, styles.cancelButton]}
-                  onPress={() => setModalVisible(false)}>
-                  <Text style={styles.buttonText}>Cancel</Text>
-                </Pressable>
-                <Pressable
-                  style={[styles.modalButton, styles.saveButton]}
-                  onPress={handleUpdateProfile}>
-                  <Text style={[styles.buttonText, styles.saveButtonText]}>Save</Text>
-                </Pressable>
-              </View>
+          {/* Activity Section */}
+          <View style={styles.activitySection}>
+            <View style={styles.activityItem}>
+              <Text style={styles.activityNumber}>{userInfo?.stats?.postCount || 0}</Text>
+              <Text style={styles.activityLabel}>Posts</Text>
+            </View>
+            <View style={styles.activityItem}>
+              <Text style={styles.activityNumber}>{userInfo?.stats?.commentCount || 0}</Text>
+              <Text style={styles.activityLabel}>Comments</Text>
+            </View>
+            <View style={styles.activityItem}>
+              <Text style={styles.activityNumber}>{userInfo?.stats?.followersCount || 0}</Text>
+              <Text style={styles.activityLabel}>Followers</Text>
+            </View>
+            <View style={styles.activityItem}>
+              <Text style={styles.activityNumber}>{userInfo?.stats?.followingCount || 0}</Text>
+              <Text style={styles.activityLabel}>Following</Text>
             </View>
           </View>
-        </Modal>
-      </View>
-    </>
+
+          {/* Learning Section */}
+          <View style={styles.tradeSection}>
+            <TouchableOpacity style={styles.tradeItem}>
+              <FontAwesome5 name="book" size={24} color="black" />
+              <Text style={styles.tradeLabel}>My Courses</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.tradeItem}>
+              <FontAwesome5 name="history" size={24} color="black" />
+              <Text style={styles.tradeLabel}>Learning History</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.tradeItem}>
+              <FontAwesome5 name="comments" size={24} color="black" />
+              <Text style={styles.tradeLabel}>Messages</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.tradeItem}>
+              <FontAwesome5 name="bookmark" size={24} color="black" />
+              <Text style={styles.tradeLabel}>Bookmarks</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Other Section */}
+          <View style={styles.otherSection}>
+            <TouchableOpacity style={styles.otherItem}>
+              <FontAwesome5 name="bullhorn" size={24} color="black" />
+              <Text style={styles.otherLabel}>Announcements</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.otherItem}>
+              <FontAwesome5 name="headset" size={24} color="black" />
+              <Text style={styles.otherLabel}>Support</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.otherItem}>
+              <FontAwesome5 name="user-plus" size={24} color="black" />
+              <Text style={styles.otherLabel}>Become a Teacher</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Logout Button */}
+          <Button title="Logout" onPress={logout} color="#FF0000" />
+        </View>
+      </ScrollView>
+
+      {/* Edit Profile Modal */}
+      <Modal
+        animationType="slide"
+        transparent
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}>
+        <View style={styles.modalOverlay}>
+          <Pressable style={styles.modalBackdrop} onPress={() => setModalVisible(false)}>
+            <GestureDetector gesture={gesture}>
+              <Animated.View style={[styles.modalContent, animatedStyle]}>
+                <View style={styles.modalHandle} />
+                <ScrollView
+                  showsVerticalScrollIndicator={false}
+                  bounces={false}
+                  contentContainerStyle={styles.modalScrollContent}>
+                  <Text style={styles.modalTitle}>Edit Profile</Text>
+
+                  {/* Profile Image Section */}
+                  <View style={styles.profileImageSection}>
+                    <Image
+                      source={{
+                        uri: editedProfile.profilePictureUrl || 'https://via.placeholder.com/100',
+                      }}
+                      style={styles.modalProfileImage}
+                    />
+                    <TouchableOpacity style={styles.changePhotoButton} onPress={pickImage}>
+                      <Text style={styles.changePhotoText}>Change Photo</Text>
+                    </TouchableOpacity>
+                  </View>
+
+                  <View style={styles.inputContainer}>
+                    <Text style={styles.inputLabel}>Username</Text>
+                    <TextInput
+                      style={styles.input}
+                      value={editedProfile.username}
+                      onChangeText={(text) =>
+                        setEditedProfile((prev) => ({ ...prev, username: text }))
+                      }
+                      placeholder="Enter username"
+                    />
+                  </View>
+
+                  <View style={styles.inputContainer}>
+                    <Text style={styles.inputLabel}>Email</Text>
+                    <TextInput
+                      style={[styles.input, { backgroundColor: '#f0f0f0' }]}
+                      value={userInfo?.email}
+                      editable={false}
+                      placeholder="Email"
+                    />
+                  </View>
+
+                  <View style={styles.inputContainer}>
+                    <Text style={styles.inputLabel}>Bio</Text>
+                    <TextInput
+                      style={[styles.input, styles.bioInput]}
+                      value={editedProfile.bio}
+                      onChangeText={(text) => setEditedProfile((prev) => ({ ...prev, bio: text }))}
+                      placeholder="Enter bio"
+                      multiline
+                      numberOfLines={4}
+                    />
+                  </View>
+                </ScrollView>
+                {/* 버튼을 ScrollView 밖으로 이동 */}
+                <View style={styles.modalButtons}>
+                  <Pressable
+                    style={[styles.modalButton, styles.cancelButton]}
+                    onPress={() => setModalVisible(false)}>
+                    <Text style={styles.buttonText}>Cancel</Text>
+                  </Pressable>
+                  <Pressable
+                    style={[styles.modalButton, styles.saveButton]}
+                    onPress={handleUpdateProfile}>
+                    <Text style={[styles.buttonText, styles.saveButtonText]}>Save</Text>
+                  </Pressable>
+                </View>
+              </Animated.View>
+            </GestureDetector>
+          </Pressable>
+        </View>
+      </Modal>
+    </SafeAreaView>
   );
 }
 
@@ -454,5 +505,71 @@ const styles = StyleSheet.create({
     color: '#007bff',
     fontSize: 14,
     fontWeight: '500',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalBackdrop: {
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    maxHeight: '90%',
+    width: '100%',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: -2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  modalScrollContent: {
+    paddingBottom: 20, // 스크롤 영역 하단 여백
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 16, // 버튼 상하 여백
+    paddingHorizontal: 20,
+    backgroundColor: 'white', // 버튼 배경색
+    borderTopWidth: 1,
+    borderTopColor: '#E5E5E5',
+    gap: 12,
+  },
+  modalHandle: {
+    width: 40,
+    height: 4,
+    backgroundColor: '#D3D3D3',
+    borderRadius: 2,
+    alignSelf: 'center',
+    marginBottom: 15,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#E5E5E5',
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    backgroundColor: 'white',
+  },
+  bioInput: {
+    height: 100,
+    textAlignVertical: 'top',
+    paddingTop: 12,
   },
 });
