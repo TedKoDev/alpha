@@ -5,6 +5,9 @@ import { Link } from 'expo-router';
 import { View, Text, Pressable } from 'react-native';
 
 export default function InstagramStyleItem({ event }: any) {
+  // 삭제되지 않은 미디어만 필터링
+  const activeMedia = event.media?.filter((media) => media.deleted_at === null) || [];
+
   return (
     <Link href={`/event/${event.post_id}`} asChild>
       <Pressable className="bg-white">
@@ -28,17 +31,17 @@ export default function InstagramStyleItem({ event }: any) {
           </View>
         </View>
 
-        {event.media?.length > 0 && (
+        {activeMedia.length > 0 && (
           <View className="relative">
             <Image
-              source={{ uri: event.media[0].media_url }}
+              source={{ uri: activeMedia[0].media_url }}
               style={{ width: '100%', height: 384 }}
               contentFit="cover"
               transition={200}
             />
-            {event.media.length > 1 && (
+            {activeMedia.length > 1 && (
               <View className="absolute bottom-3 right-3 rounded-md bg-black/50 px-2 py-1">
-                <Text className="text-sm text-white">+{event.media.length - 1}</Text>
+                <Text className="text-sm text-white">+{activeMedia.length - 1}</Text>
               </View>
             )}
           </View>

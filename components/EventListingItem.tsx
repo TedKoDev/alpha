@@ -5,6 +5,9 @@ import { Link } from 'expo-router';
 import { View, Text, Pressable } from 'react-native';
 
 export default function EventListItem({ event }: any) {
+  // 삭제되지 않은 미디어만 필터링
+  const activeMedia = event.media?.filter((media) => media.deleted_at === null) || [];
+
   return (
     <Link href={`/event/${event.post_id}`} asChild>
       <Pressable className="border-b border-gray-200 bg-white p-4">
@@ -24,8 +27,8 @@ export default function EventListItem({ event }: any) {
           </View>
         </View>
 
-        <View className={`flex-row ${event.media?.length > 0 ? 'gap-4' : ''}`}>
-          <View className={`flex-1 ${event.media?.length > 0 ? 'flex-[2]' : ''}`}>
+        <View className={`flex-row ${activeMedia.length > 0 ? 'gap-4' : ''}`}>
+          <View className={`flex-1 ${activeMedia.length > 0 ? 'flex-[2]' : ''}`}>
             <Text className="mb-2 text-lg font-bold" numberOfLines={2}>
               {event.post_content.title}
             </Text>
@@ -34,17 +37,17 @@ export default function EventListItem({ event }: any) {
             </Text>
           </View>
 
-          {event.media?.length > 0 && (
+          {activeMedia.length > 0 && (
             <View className="relative flex-1">
               <Image
-                source={{ uri: event.media[0].media_url }}
+                source={{ uri: activeMedia[0].media_url }}
                 style={{ width: '100%', height: 80, borderRadius: 6 }}
                 contentFit="cover"
                 transition={200}
               />
-              {event.media.length > 1 && (
+              {activeMedia.length > 1 && (
                 <View className="absolute bottom-2 right-2 rounded-md bg-black/50 px-2 py-1">
-                  <Text className="text-xs text-white">+{event.media.length - 1}</Text>
+                  <Text className="text-xs text-white">+{activeMedia.length - 1}</Text>
                 </View>
               )}
             </View>

@@ -1,4 +1,5 @@
 import { useMutation, useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Image } from 'expo-image';
 
 import { queryClient } from '~/queries/queryClient';
 import {
@@ -112,9 +113,23 @@ export const useUpdatePost = () => {
   return useMutation({
     mutationFn: ({ postId, ...updateData }: UpdatePostDto & { postId: number }) =>
       postService.updatePost(postId, updateData),
-    onSuccess: () => {
-      // 포스트 목록과 상세 데이터 갱신
-      queryClient.invalidateQueries({ queryKey: ['posts'] });
+    onSuccess: async (_, variables) => {
+      // 1. 이미지 캐시 클리어
+      await Image.clearMemoryCache();
+      await Image.clearDiskCache();
+
+      // 2. 쿼리 무효화 및 리프레시
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['posts'] }),
+        queryClient.invalidateQueries({ queryKey: ['post', variables.postId] }),
+        queryClient.refetchQueries({ queryKey: ['posts'] }),
+        queryClient.refetchQueries({ queryKey: ['post', variables.postId] }),
+        queryClient.invalidateQueries({ queryKey: ['logs'] }),
+        queryClient.invalidateQueries({ queryKey: ['userInfo'] }),
+      ]);
+    },
+    onError: (error) => {
+      console.error('Update post failed:', error);
     },
   });
 };

@@ -21,6 +21,8 @@ export default function Feed() {
     sort: 'latest',
   });
 
+  console.log('postsData', JSON.stringify(postsData, null, 2));
+
   const [lastRefreshTime, setLastRefreshTime] = useState(Date.now());
 
   const allPosts = postsData?.pages?.flatMap((page) => page.data) ?? [];
