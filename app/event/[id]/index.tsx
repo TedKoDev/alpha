@@ -133,16 +133,9 @@ export default function EventPage() {
               </View>
 
               {/* Comments Section */}
-              <CommentSection comments={post.comments} />
+              <CommentSection postId={post.post_id} comments={post.comments} />
             </View>
           </ScrollView>
-
-          {/* Comment Input */}
-          <View className="mb-3 border-t border-gray-200 px-4 py-5">
-            <Pressable className="flex-row items-center rounded-full bg-gray-100 px-4 py-2">
-              <Text className="text-gray-500">댓글을 입력하세요...</Text>
-            </Pressable>
-          </View>
         </View>
       </BottomSheetModalProvider>
     </GestureHandlerRootView>
