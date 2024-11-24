@@ -2,6 +2,8 @@ import { Video } from 'expo-av';
 import { Stack, useRouter } from 'expo-router';
 import React, { useState, useEffect } from 'react';
 import { View, TextInput, Pressable, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { useLogs } from '~/queries/hooks/logs/useLogs';
+import { useCountry } from '~/queries/hooks/utils/useCountry';
 
 import { useAuthStore } from '~/store/authStore';
 

@@ -1,5 +1,22 @@
 import { api } from './api';
 
+interface CountryResponse {
+  status: string;
+  data: any[]; // 실제 country 타입으로 수정하는 것이 좋습니다
+}
+
+export const getCountryListApi = async () => {
+  try {
+    const response = await api.get('/country/list'); // 또는 '/country'
+    if (response.data.status === 'success') {
+      return response.data.data; // 실제 국가 데이터 배열 반환
+    }
+    throw new Error(response.data.message || '국가 목록을 가져오는데 실패했습니다');
+  } catch (error) {
+    console.error('국가 목록 조회 실패:', error);
+    throw error;
+  }
+};
 export const loginApi = async (email: string, password: string) => {
   try {
     const response = await api.post('/auth/login', { email, password });

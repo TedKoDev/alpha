@@ -1,7 +1,9 @@
 import { Stack, useRouter } from 'expo-router';
 import { debounce } from 'lodash';
 import React, { useState } from 'react';
-import { View, TextInput, Pressable, Text, StyleSheet } from 'react-native';
+import { View, TextInput, Pressable, Text, StyleSheet, FlatList, Modal } from 'react-native';
+import { useCountry } from '~/queries/hooks/utils/useCountry';
+import { Ionicons } from '@expo/vector-icons';
 
 import { authService } from '~/services/authService';
 import { useAuthStore } from '~/store/authStore';
@@ -20,6 +22,24 @@ export default function RegisterScreen() {
   const { register } = useAuthStore();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+
+  const { data: country } = useCountry();
+  console.log('country', JSON.stringify(country, null, 2));
+
+  const [selectedCountry, setSelectedCountry] = useState({
+    country_code: 'GL',
+    country_name: 'Global',
+    flag_icon: '🌎',
+  });
+  const [showCountryModal, setShowCountryModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const { data: countries } = useCountry();
+
+  const filteredCountries = countries?.filter(
+    (country) =>
+      country.country_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      country.country_code.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const checkName = debounce(async (name: string) => {
     if (!name) {
@@ -99,6 +119,50 @@ export default function RegisterScreen() {
       <View style={styles.container}>
         <View style={styles.overlay}>
           <Text style={styles.title}>Create Account</Text>
+
+          <Pressable style={styles.countrySelector} onPress={() => setShowCountryModal(true)}>
+            <Text style={styles.countrySelectorText}>
+              {selectedCountry.flag_icon} {selectedCountry.country_name}
+            </Text>
+            <Ionicons name="chevron-down" size={24} color="#666" />
+          </Pressable>
+
+          <Modal visible={showCountryModal} animationType="slide" transparent={true}>
+            <View style={styles.modalContainer}>
+              <View style={styles.modalContent}>
+                <View style={styles.modalHeader}>
+                  <Text style={styles.modalTitle}>Select Country</Text>
+                  <Pressable onPress={() => setShowCountryModal(false)}>
+                    <Ionicons name="close" size={24} color="#666" />
+                  </Pressable>
+                </View>
+
+                <TextInput
+                  style={styles.searchInput}
+                  placeholder="Search country..."
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
+                />
+
+                <FlatList
+                  data={filteredCountries}
+                  keyExtractor={(item) => item.country_code}
+                  renderItem={({ item }) => (
+                    <Pressable
+                      style={styles.countryItem}
+                      onPress={() => {
+                        setSelectedCountry(item);
+                        setShowCountryModal(false);
+                      }}>
+                      <Text style={styles.countryItemText}>
+                        {item.flag_icon} {item.country_name}
+                      </Text>
+                    </Pressable>
+                  )}
+                />
+              </View>
+            </View>
+          </Modal>
 
           <View style={styles.inputContainer}>
             <TextInput
@@ -275,5 +339,64 @@ const styles = StyleSheet.create({
   },
   disabledButton: {
     opacity: 0.7,
+  },
+  countrySelector: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+    height: 50,
+    backgroundColor: '#ffffff',
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    marginBottom: 15,
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  countrySelectorText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    maxHeight: '80%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+  },
+  searchInput: {
+    height: 40,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 8,
+    paddingHorizontal: 15,
+    marginVertical: 10,
+  },
+  countryItem: {
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  countryItemText: {
+    fontSize: 16,
+    color: '#333',
   },
 });
