@@ -1,7 +1,7 @@
 import { Feather } from '@expo/vector-icons';
 import React, { useState, useRef } from 'react';
-import { View, Alert, TouchableWithoutFeedback, Keyboard } from 'react-native';
-import { Pressable, TextInput } from 'react-native-gesture-handler';
+import { View, TextInput, Alert, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { Pressable } from 'react-native-gesture-handler';
 
 import { useCreateComment } from '~/queries/hooks/comments/useComments';
 

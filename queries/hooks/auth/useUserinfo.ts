@@ -39,7 +39,10 @@ export function useUserInfo() {
       return response;
     },
     enabled: !!token,
-    staleTime: 0,
+    staleTime: Infinity, // Set to a high value to avoid frequent refetching
+    // cacheTime is removed as it is not a valid option
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
   });
 }
 

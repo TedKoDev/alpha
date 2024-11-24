@@ -31,6 +31,7 @@ interface CommentItemProps {
     content: string;
     user_liked: boolean;
     likes: number;
+    user_id: number;
   };
   onToggleLike: (commentId: number) => void; // 댓글 좋아요 토글 함수
   onDelete: (commentId: number) => void; // 댓글 삭제 함수
@@ -38,11 +39,12 @@ interface CommentItemProps {
 }
 
 export default function CommentItem({ comment, onToggleLike, onDelete, onEdit }: CommentItemProps) {
+  console.log('comment ', comment);
   const [modalVisible, setModalVisible] = useState(false);
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
   const slideAnim = React.useRef(new Animated.Value(100)).current;
   const currentUser = useAuthStore((state) => state.userInfo);
-  const isMyComment = currentUser?.user_id === comment.user.user_id;
+  const isMyComment = currentUser?.user_id === comment.user_id;
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(comment.content);
 
@@ -140,7 +142,7 @@ export default function CommentItem({ comment, onToggleLike, onDelete, onEdit }:
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <View className="mb-4">
+      <View className="mb-4 border-b border-gray-200 pb-2">
         <View className="flex-row items-start">
           <Image
             source={{

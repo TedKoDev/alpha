@@ -101,6 +101,7 @@ export function useAddPost() {
         queryClient.refetchQueries({ queryKey: ['posts'] }),
         queryClient.invalidateQueries({ queryKey: ['logs'] }),
         queryClient.invalidateQueries({ queryKey: ['userInfo'] }),
+        queryClient.refetchQueries({ queryKey: ['userInfo'], exact: true }),
       ]);
     },
   });
@@ -124,8 +125,13 @@ export const useUpdatePost = () => {
         queryClient.invalidateQueries({ queryKey: ['post', variables.postId] }),
         queryClient.refetchQueries({ queryKey: ['posts'] }),
         queryClient.refetchQueries({ queryKey: ['post', variables.postId] }),
-        queryClient.invalidateQueries({ queryKey: ['logs'] }),
-        queryClient.invalidateQueries({ queryKey: ['userInfo'] }),
+        queryClient.invalidateQueries({ queryKey: ['comments', variables.postId] }),
+        queryClient.refetchQueries({ queryKey: ['comments', variables.postId] }),
+
+        // queryClient.invalidateQueries({ queryKey: ['logs'] }),
+        queryClient.refetchQueries({ queryKey: ['logs'] }),
+        // queryClient.invalidateQueries({ queryKey: ['userInfo'] }),
+        queryClient.refetchQueries({ queryKey: ['userInfo'] }),
       ]);
     },
     onError: (error) => {
@@ -140,8 +146,16 @@ export const useDeletePost = () => {
 
   return useMutation({
     mutationFn: (postId: number) => postService.deletePost(postId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['posts'] });
+    onSuccess: async () => {
+      // 모든 관련 쿼리 무효화 및 리프레시
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['posts'] }),
+        queryClient.refetchQueries({ queryKey: ['posts'] }),
+        queryClient.invalidateQueries({ queryKey: ['logs'] }),
+        queryClient.refetchQueries({ queryKey: ['logs'] }),
+        queryClient.invalidateQueries({ queryKey: ['userInfo'] }),
+        queryClient.refetchQueries({ queryKey: ['userInfo'], exact: true }),
+      ]);
     },
   });
 };

@@ -1,15 +1,18 @@
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
-import { View, Text } from 'react-native';
+import { useRouter } from 'expo-router';
+import { View, Text, TouchableOpacity, Platform } from 'react-native';
 
 import CommentItem from './CommentItem';
 
 import { useDeleteComment, useUpdateComment } from '~/queries/hooks/comments/useComments';
 import { useToggleCommentLike } from '~/queries/hooks/useLikes';
+import React from 'react';
 
 dayjs.extend(relativeTime);
 
 export default function CommentSection({ postId, comments = [], comment_count }: any) {
+  const router = useRouter();
   const toggleCommentLikeMutation = useToggleCommentLike();
   const deleteCommentMutation = useDeleteComment();
   const editCommentMutation = useUpdateComment();
@@ -28,20 +31,29 @@ export default function CommentSection({ postId, comments = [], comment_count }:
 
   return (
     <View className="mt-4">
-      <Text className="mb-4 text-lg font-bold">Comments ({comment_count})</Text>
+      <View className="mb-4 flex-row items-center justify-between">
+        <Text className="text-lg font-bold">Comments ({comment_count})</Text>
+        {comment_count > 3 && (
+          <TouchableOpacity onPress={() => router.push(`/event/${postId}/commentList`)}>
+            <Text className="text-purple-600">see all</Text>
+          </TouchableOpacity>
+        )}
+      </View>
 
       {comment_count === 0 ? (
         <Text className="text-center text-gray-500">No comments yet.</Text>
       ) : (
-        comments.map((comment: any) => (
-          <CommentItem
-            key={comment.comment_id}
-            comment={comment}
-            onToggleLike={handleToggleLike}
-            onDelete={handleDeleteComment}
-            onEdit={handleEditComment}
-          />
-        ))
+        <View style={{ paddingBottom: Platform.OS === 'ios' ? 130 : 80 }}>
+          {comments.slice(0, 5).map((comment: any) => (
+            <CommentItem
+              key={comment.comment_id}
+              comment={comment}
+              onToggleLike={handleToggleLike}
+              onDelete={handleDeleteComment}
+              onEdit={handleEditComment}
+            />
+          ))}
+        </View>
       )}
     </View>
   );

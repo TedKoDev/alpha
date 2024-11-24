@@ -1,7 +1,7 @@
 import { FontAwesome5 } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { Stack } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   View,
@@ -25,21 +25,44 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { useUpdateProfile } from '~/queries/hooks/auth/useUpdateProfile';
+import { useUserInfo } from '~/queries/hooks/auth/useUserinfo';
 import { getPresignedUrlApi, uploadFileToS3 } from '~/services/s3Service';
 import { useAuthStore } from '~/store/authStore';
 
 export default function MyPage() {
-  const { logout, userInfo } = useAuthStore();
+  const { logout } = useAuthStore();
   const updateProfileMutation = useUpdateProfile();
+  const { data: userInfo }: any = useUserInfo();
 
-  console.log(userInfo);
+  console.log('userInfo', userInfo);
+
   const [modalVisible, setModalVisible] = useState(false);
   const [editedProfile, setEditedProfile] = useState({
-    userId: userInfo?.user_id,
-    username: userInfo?.username || '',
-    bio: userInfo?.bio || '',
-    profilePictureUrl: userInfo?.profile_picture_url || '',
+    username: '',
+    bio: '',
+    profilePictureUrl: '',
   });
+
+  useEffect(() => {
+    if (userInfo) {
+      setEditedProfile({
+        username: userInfo.username || '',
+        bio: userInfo.bio || '',
+        profilePictureUrl: userInfo.profile_picture_url || '',
+      });
+    }
+  }, [userInfo]);
+
+  const handleModalOpen = () => {
+    if (userInfo) {
+      setEditedProfile({
+        username: userInfo.username || '',
+        bio: userInfo.bio || '',
+        profilePictureUrl: userInfo.profile_picture_url || '',
+      });
+    }
+    setModalVisible(true);
+  };
 
   const pickImage = async () => {
     try {
@@ -154,7 +177,9 @@ export default function MyPage() {
           {/* Profile Section */}
           <View style={styles.profileSection}>
             <Image
-              source={{ uri: userInfo?.profile_picture_url || 'https://via.placeholder.com/100' }}
+              source={{
+                uri: userInfo?.profile_picture_url || 'https://via.placeholder.com/100',
+              }}
               style={styles.profileImage}
             />
             <View style={styles.userInfo}>
@@ -162,9 +187,7 @@ export default function MyPage() {
               <Text style={styles.rankText}>Lv {userInfo?.level || 1}</Text>
               <Text style={styles.userEmail}>{userInfo?.email}</Text>
             </View>
-            <TouchableOpacity
-              style={styles.editProfileButton}
-              onPress={() => setModalVisible(true)}>
+            <TouchableOpacity style={styles.editProfileButton} onPress={handleModalOpen}>
               <Text style={styles.editProfileText}>Edit Profile</Text>
             </TouchableOpacity>
           </View>
@@ -190,7 +213,7 @@ export default function MyPage() {
               <Text style={styles.activityLabel}>Followers</Text>
             </View>
             <View style={styles.activityItem}>
-              <Text style={styles.activityNumber}>{userInfo?.stats?.followingCount || 0}</Text>
+              <Text style={styles.activityNumber}>{userInfo?.followingCount || 0}</Text>
               <Text style={styles.activityLabel}>Following</Text>
             </View>
           </View>

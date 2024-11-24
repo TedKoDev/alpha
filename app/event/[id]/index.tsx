@@ -2,7 +2,7 @@ import { Feather, FontAwesome } from '@expo/vector-icons';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import dayjs from 'dayjs';
 import { Image } from 'expo-image';
-import { useLocalSearchParams, Stack } from 'expo-router';
+import { useLocalSearchParams, Stack, router } from 'expo-router';
 import React, { useState, useCallback } from 'react';
 import {
   Text,
@@ -39,6 +39,7 @@ export default function EventPage() {
   if (isLoading) return <Text>Loading...</Text>;
   if (!post) return <Text>Post not found</Text>;
 
+  console.log('post', JSON.stringify(post, null, 2));
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <BottomSheetModalProvider>
@@ -71,10 +72,10 @@ export default function EventPage() {
                 user_profile_picture_url={post.user_profile_picture_url}
               />
 
-              <View className="p-4">
+              <View className="py-2">
                 {/* Post Content */}
                 {post.post_content.title && (
-                  <Text className="mb-2 text-lg font-bold">{post.post_content.title}</Text>
+                  <Text className="mb-2 px-2 text-lg font-bold">{post.post_content.title}</Text>
                 )}
                 {post.media && post.media.length > 0 && (
                   <View>
@@ -86,6 +87,7 @@ export default function EventPage() {
                       onScroll={handleScroll}
                       renderItem={({ item }) => (
                         <Image
+                          contentFit="cover"
                           source={{ uri: item.media_url }}
                           style={{ width, height: 300 }}
                           className="mb-4 rounded-lg"
@@ -106,11 +108,13 @@ export default function EventPage() {
                   </View>
                 )}
                 {post.post_content.content && (
-                  <Text className="mb-4 text-base text-gray-800">{post.post_content.content}</Text>
+                  <Text className="mb-4 px-2 text-base text-gray-800">
+                    {post.post_content.content}
+                  </Text>
                 )}
 
                 {/* Engagement Stats */}
-                <View className="mt-2 flex-row items-center gap-4 border-b border-gray-200 pb-4">
+                <View className="mt-2 flex-row items-center gap-4 border-b border-gray-200 px-4 pb-4">
                   <Pressable onPress={() => togglePostLikeMutation.mutate(post.post_id)}>
                     <View className="flex-row items-center">
                       <FontAwesome
@@ -121,10 +125,12 @@ export default function EventPage() {
                       <Text className="ml-1 text-sm text-gray-500">{post.likes}</Text>
                     </View>
                   </Pressable>
+
                   <View className="flex-row items-center">
                     <Feather name="message-square" size={16} color="#666666" />
-                    <Text className="ml-1 text-sm text-gray-500">{post.comments?.length || 0}</Text>
+                    <Text className="ml-1 text-sm text-gray-500">{post.comment_count || 0}</Text>
                   </View>
+
                   <View className="flex-row items-center">
                     <Feather name="eye" size={16} color="#666666" />
                     <Text className="ml-1 text-sm text-gray-500">{post.views}</Text>
@@ -132,12 +138,14 @@ export default function EventPage() {
                 </View>
 
                 {/* Comments Section */}
-                <CommentSection
-                  postId={post.post_id}
-                  comments={post.comments}
-                  comment_count={post.comment_count}
-                />
-                <View className="h-20" />
+                <View className="px-4">
+                  <CommentSection
+                    postId={post.post_id}
+                    comments={post.comments}
+                    comment_count={post.comment_count}
+                  />
+                </View>
+                {/* <View className="h-20" /> */}
               </View>
             </ScrollView>
 

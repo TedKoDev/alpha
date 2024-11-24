@@ -10,6 +10,12 @@ export interface CreateCommentRequest {
     media_type: string;
   }[];
 }
+export interface PaginationQueryDto {
+  page?: number;
+  limit?: number;
+  sort?: 'latest' | 'oldest' | 'popular';
+  postId?: number;
+}
 
 export const commentService = {
   // 댓글 생성
@@ -44,24 +50,28 @@ export const commentService = {
   },
 
   // 댓글 목록 조회
-  getComments: async (postId: number, page = 1, limit = 10) => {
-    const token = useAuthStore.getState().userToken;
-    if (!token) {
-      throw new Error('No token found');
+  getComments: async (queryDto: PaginationQueryDto) => {
+    try {
+      const token = useAuthStore.getState().userToken;
+      if (!token) {
+        throw new Error('No token found');
+      }
+      const response = await api.get('/comments', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: {
+          page: queryDto.page,
+          limit: queryDto.limit,
+          sort: queryDto.sort,
+          postId: queryDto.postId,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error in getComments:', error);
+      throw error;
     }
-
-    const response = await api.get('/comments', {
-      params: {
-        postId,
-        page,
-        limit,
-        sort: 'latest',
-      },
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response.data;
   },
 
   // 댓글 삭제
