@@ -155,7 +155,7 @@ export default function ListLayout({
             <InstagramStyleItem event={item} />
           )
         }
-        keyExtractor={(item) => item.post_id.toString()}
+        keyExtractor={(item) => item.post_id}
         ItemSeparatorComponent={() => <View className="h-[1px] bg-gray-100" />}
         onEndReached={onLoadMore}
         onEndReachedThreshold={0.5}

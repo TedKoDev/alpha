@@ -1,9 +1,8 @@
-import Feather from '@expo/vector-icons/Feather';
+import { Feather, FontAwesome } from '@expo/vector-icons';
 import dayjs from 'dayjs';
 import { Image } from 'expo-image';
 import { Link } from 'expo-router';
 import { View, Text, Pressable } from 'react-native';
-
 export default function EventListItem({ event }: any) {
   // 삭제되지 않은 미디어만 필터링
   const activeMedia = event.media?.filter((media) => media.deleted_at === null) || [];
@@ -67,7 +66,11 @@ export default function EventListItem({ event }: any) {
               <Text className="ml-1 text-sm text-gray-500">{event.comments?.length || 0}</Text>
             </View>
             <View className="ml-4 flex-row items-center">
-              <Feather name="heart" size={16} color="gray" />
+              <FontAwesome
+                name={event.user_liked ? 'heart' : 'heart-o'}
+                size={16}
+                color={event.user_liked ? 'red' : 'gray'}
+              />
               <Text className="ml-1 text-sm text-gray-500">{event.likes}</Text>
             </View>
           </View>

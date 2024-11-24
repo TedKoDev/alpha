@@ -138,7 +138,7 @@ export default function LessonCard({ onMorePress, participationCount = 0, points
           ) : (
             posts?.pages[0]?.data?.map((post: any, index: number) => (
               <View key={index} className="mb-2 flex-row items-center justify-between">
-                <Text className="flex-1 text-sm text-[#B227D4]">{post.post_content.content}</Text>
+                <Text className="flex-1 text-sm text-[#B227D4]">{post.post_content?.content}</Text>
                 <View className="ml-2 flex-row gap-3">
                   <View className="flex-row items-center gap-1">
                     <FontAwesome name="heart" size={12} color="#666666" />

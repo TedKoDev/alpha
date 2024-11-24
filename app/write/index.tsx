@@ -20,7 +20,7 @@ import { queryClient } from '~/queries/queryClient';
 import { CreateMediaDto, CreatePostDto } from '~/services/postService';
 import { getPresignedUrlApi, uploadFileToS3 } from '~/services/s3Service';
 
-type PostType = 'SENTENCE' | 'COLUMN' | 'QUESTION' | 'GENERAL';
+type PostType = 'SENTENCE' | 'COLUMN' | 'QUESTION' | 'GENERAL' | 'CONSULTATION';
 
 const MAX_IMAGES = 5; // 최대 이미지 개수 상수 추가
 
@@ -51,6 +51,7 @@ export default function WriteScreen() {
     { type: 'SENTENCE', label: 'Today Words' },
     { type: 'COLUMN', label: 'Column' },
     { type: 'QUESTION', label: 'Question' },
+    { type: 'CONSULTATION', label: 'Consultation' },
   ];
 
   const pickImages = async () => {
@@ -119,7 +120,7 @@ export default function WriteScreen() {
       const postData: CreatePostDto = {
         title: title.trim(),
         content: content.trim(),
-        type: selectedType,
+        type: selectedType as PostType,
         categoryId: selectedCategory,
         media: mediaData as CreateMediaDto[],
         ...(selectedType === 'QUESTION' && { points: parseInt(points, 10) || 0 }),

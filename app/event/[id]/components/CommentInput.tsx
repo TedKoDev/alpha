@@ -1,6 +1,7 @@
 import { Feather } from '@expo/vector-icons';
-import React, { useState } from 'react';
-import { View, TextInput, Pressable, Alert } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, Alert, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { Pressable, TextInput } from 'react-native-gesture-handler';
 
 import { useCreateComment } from '~/queries/hooks/comments/useComments';
 
@@ -17,10 +18,10 @@ export default function CommentInput({
 }: CommentInputProps) {
   const [content, setContent] = useState('');
   const createCommentMutation = useCreateComment();
+  const inputRef = useRef<TextInput>(null);
 
   const handleSubmit = async () => {
     if (!content.trim()) return;
-    console.log('content', content);
 
     try {
       await createCommentMutation.mutateAsync({
@@ -35,21 +36,26 @@ export default function CommentInput({
   };
 
   return (
-    <View className="flex-row items-center border-t border-gray-200 bg-white px-4 py-2">
-      <TextInput
-        className="mr-2 flex-1 rounded-full bg-gray-100 px-4 py-2"
-        placeholder={placeholder}
-        value={content}
-        onChangeText={setContent}
-        multiline
-      />
-      <Pressable
-        onPress={handleSubmit}
-        disabled={createCommentMutation.isPending || !content.trim()}
-        className="rounded-full p-2"
-        style={{ opacity: content.trim() ? 1 : 0.5 }}>
-        <Feather name="send" size={24} color="#B227D4" />
-      </Pressable>
-    </View>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <View className="flex-row items-center border-t border-gray-200 bg-white px-4 py-2">
+        <View className="mr-2 flex-1">
+          <TextInput
+            ref={inputRef}
+            className="rounded-full bg-gray-100 px-4 py-2"
+            placeholder={placeholder}
+            value={content}
+            onChangeText={setContent}
+            multiline
+          />
+        </View>
+        <Pressable
+          onPress={handleSubmit}
+          disabled={createCommentMutation.isPending || !content.trim()}
+          className="rounded-full p-2"
+          style={{ opacity: content.trim() ? 1 : 0.5 }}>
+          <Feather name="send" size={24} color="#B227D4" />
+        </Pressable>
+      </View>
+    </TouchableWithoutFeedback>
   );
 }

@@ -1,3 +1,4 @@
+import { FontAwesome } from '@expo/vector-icons';
 import Feather from '@expo/vector-icons/Feather';
 import dayjs from 'dayjs';
 import { Image } from 'expo-image';
@@ -71,7 +72,11 @@ export default function InstagramStyleItem({ event }: any) {
               <Text className="ml-2 text-sm text-gray-600">{event.comments?.length || 0}</Text>
             </View>
             <View className="ml-4 flex-row items-center">
-              <Feather name="heart" size={20} color="gray" />
+              <FontAwesome
+                name={event.user_liked ? 'heart' : 'heart-o'} // 좋아요 상태에 따라 아이콘 변경
+                size={20}
+                color={event.user_liked ? 'red' : 'gray'} // 좋아요 상태에 따라 색상 변경
+              />
               <Text className="ml-2 text-sm text-gray-600">{event.likes}</Text>
             </View>
           </View>
