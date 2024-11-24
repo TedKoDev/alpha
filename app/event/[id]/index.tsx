@@ -3,26 +3,24 @@ import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import dayjs from 'dayjs';
 import { Image } from 'expo-image';
 import { useLocalSearchParams, Stack } from 'expo-router';
-import React, { useState, useCallback, memo, useRef } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   Text,
   View,
-  Pressable,
   ScrollView,
   FlatList,
   Dimensions,
-  Alert,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { Pressable, GestureHandlerRootView } from 'react-native-gesture-handler';
 
+import CommentInput from './components/CommentInput';
 import CommentSection from './components/CommentSection';
 import UserInfo from './components/UserInfo';
 
 import { useGetPostById } from '~/queries/hooks/posts/usePosts';
 import { useTogglePostLike } from '~/queries/hooks/useLikes';
-import CommentInput from './components/CommentInput';
 
 const { width } = Dimensions.get('window');
 
@@ -45,9 +43,9 @@ export default function EventPage() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <BottomSheetModalProvider>
         <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           style={{ flex: 1 }}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 30}>
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}>
           <View className="flex-1 bg-white">
             <Stack.Screen
               options={{
@@ -63,7 +61,7 @@ export default function EventPage() {
               className="flex-1"
               keyboardShouldPersistTaps="handled"
               keyboardDismissMode="interactive"
-              automaticallyAdjustKeyboardInsets={true}>
+              automaticallyAdjustKeyboardInsets>
               <UserInfo
                 post_id={post.post_id}
                 user_id={post.user_id}
@@ -131,14 +129,14 @@ export default function EventPage() {
                     <Feather name="eye" size={16} color="#666666" />
                     <Text className="ml-1 text-sm text-gray-500">{post.views}</Text>
                   </View>
-                  <View className="flex-row items-center">
-                    <Feather name="bookmark" size={16} color="#666666" />
-                    <Text className="ml-1 text-sm text-gray-500">저장하기</Text>
-                  </View>
                 </View>
 
                 {/* Comments Section */}
-                <CommentSection postId={post.post_id} comments={post.comments} />
+                <CommentSection
+                  postId={post.post_id}
+                  comments={post.comments}
+                  comment_count={post.comment_count}
+                />
                 <View className="h-20" />
               </View>
             </ScrollView>

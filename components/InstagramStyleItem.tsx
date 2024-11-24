@@ -69,7 +69,7 @@ export default function InstagramStyleItem({ event }: any) {
             </View>
             <View className="ml-4 flex-row items-center">
               <Feather name="message-circle" size={20} color="gray" />
-              <Text className="ml-2 text-sm text-gray-600">{event.comments?.length || 0}</Text>
+              <Text className="ml-2 text-sm text-gray-600">{event.comment_count}</Text>
             </View>
             <View className="ml-4 flex-row items-center">
               <FontAwesome

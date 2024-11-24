@@ -5,7 +5,7 @@ import { Link } from 'expo-router';
 import { View, Text, Pressable } from 'react-native';
 export default function EventListItem({ event }: any) {
   // 삭제되지 않은 미디어만 필터링
-  const activeMedia = event.media?.filter((media) => media.deleted_at === null) || [];
+  const activeMedia = event.media?.filter((media: any) => media.deleted_at === null) || [];
 
   return (
     <Link href={`/event/${event.post_id}`} asChild>
@@ -63,7 +63,7 @@ export default function EventListItem({ event }: any) {
             </View>
             <View className="ml-4 flex-row items-center">
               <Feather name="message-square" size={16} color="gray" />
-              <Text className="ml-1 text-sm text-gray-500">{event.comments?.length || 0}</Text>
+              <Text className="ml-1 text-sm text-gray-500">{event.comment_count}</Text>
             </View>
             <View className="ml-4 flex-row items-center">
               <FontAwesome

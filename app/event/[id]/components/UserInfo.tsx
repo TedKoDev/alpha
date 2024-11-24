@@ -1,20 +1,11 @@
 import { Feather } from '@expo/vector-icons';
-import { router, useRouter } from 'expo-router';
+import { router } from 'expo-router';
 import React, { useState, useCallback } from 'react';
-import {
-  View,
-  Text,
-  Image,
-  TouchableOpacity,
-  Alert,
-  Modal,
-  Pressable,
-  Animated,
-} from 'react-native';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { View, Text, Image, Alert, Animated, Modal, TouchableOpacity } from 'react-native';
+import { GestureHandlerRootView, Pressable } from 'react-native-gesture-handler';
 
-import { useAuthStore } from '~/store/authStore';
 import { useDeletePost } from '~/queries/hooks/posts/usePosts';
+import { useAuthStore } from '~/store/authStore';
 
 interface UserInfoProps {
   post_id: number;
@@ -145,68 +136,60 @@ export default function UserInfo({
           </View>
           <Text className="text-sm text-gray-500">{createdAt}</Text>
         </View>
-        <TouchableOpacity onPress={handleOpenMenu}>
+        <Pressable onPress={handleOpenMenu}>
           <Feather name="more-horizontal" size={24} color="#666666" />
-        </TouchableOpacity>
+        </Pressable>
       </View>
 
       <Modal
         animationType="none"
-        transparent={true}
+        transparent
         visible={modalVisible}
         onRequestClose={handleCloseMenu}
         statusBarTranslucent>
-        <Animated.View
+        <TouchableOpacity
+          activeOpacity={1}
+          onPress={handleCloseMenu}
           style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
+            flex: 1,
             backgroundColor: 'rgba(0,0,0,0.5)',
-            opacity: fadeAnim,
+            justifyContent: 'flex-end',
           }}>
-          <TouchableOpacity style={{ flex: 1 }} activeOpacity={1} onPress={handleCloseMenu} />
-        </Animated.View>
-        <Animated.View
-          style={{
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'white',
-            borderTopLeftRadius: 20,
-            borderTopRightRadius: 20,
-            padding: 20,
-            transform: [
-              {
-                translateY: slideAnim.interpolate({
-                  inputRange: [0, 100],
-                  outputRange: [0, 300],
-                }),
-              },
-            ],
-          }}>
-          {isMyPost ? (
-            <>
-              <TouchableOpacity
-                onPress={handleEdit}
-                className="flex-row items-center border-b border-gray-200 py-4">
-                <Feather name="edit-2" size={20} color="#666666" />
-                <Text className="ml-3 text-base">Edit Post</Text>
+          <Animated.View
+            style={{
+              opacity: fadeAnim,
+              backgroundColor: 'white',
+              borderTopLeftRadius: 20,
+              borderTopRightRadius: 20,
+              padding: 20,
+              transform: [{ translateY: slideAnim }],
+            }}>
+            <View className="mb-2 w-full items-center">
+              <View className="h-1 w-10 rounded-full bg-gray-300" />
+            </View>
+            {isMyPost ? (
+              <>
+                <TouchableOpacity onPress={handleEdit}>
+                  <View className="flex-row items-center py-4">
+                    <Feather name="edit-2" size={20} color="#666666" />
+                    <Text className="ml-3 text-base">Edit Post</Text>
+                  </View>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={handleDelete}>
+                  <View className="flex-row items-center py-4">
+                    <Feather name="trash-2" size={20} color="#FF0000" />
+                    <Text className="ml-3 text-base text-red-500">Delete Post</Text>
+                  </View>
+                </TouchableOpacity>
+              </>
+            ) : (
+              <TouchableOpacity onPress={handleReport} className="flex-row items-center py-4">
+                <Feather name="flag" size={20} color="#666666" />
+                <Text className="ml-3 text-base">Report Post</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={handleDelete} className="flex-row items-center py-4">
-                <Feather name="trash-2" size={20} color="#FF0000" />
-                <Text className="ml-3 text-base text-red-500">Delete Post</Text>
-              </TouchableOpacity>
-            </>
-          ) : (
-            <TouchableOpacity onPress={handleReport} className="flex-row items-center py-4">
-              <Feather name="flag" size={20} color="#666666" />
-              <Text className="ml-3 text-base">Report Post</Text>
-            </TouchableOpacity>
-          )}
-        </Animated.View>
+            )}
+          </Animated.View>
+        </TouchableOpacity>
       </Modal>
     </GestureHandlerRootView>
   );

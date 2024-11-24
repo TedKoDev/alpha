@@ -2,8 +2,19 @@ import { Feather, FontAwesome } from '@expo/vector-icons';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import React, { useState, useCallback } from 'react';
-import { View, Text, Image, Alert, Animated, Modal, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  Alert,
+  Animated,
+  Modal,
+  TextInput,
+  TouchableOpacity,
+} from 'react-native';
 import { GestureHandlerRootView, Pressable } from 'react-native-gesture-handler';
+
+import EditCommentModal from './EditCommentModal';
 
 import { useAuthStore } from '~/store/authStore';
 
@@ -32,6 +43,8 @@ export default function CommentItem({ comment, onToggleLike, onDelete, onEdit }:
   const slideAnim = React.useRef(new Animated.Value(100)).current;
   const currentUser = useAuthStore((state) => state.userInfo);
   const isMyComment = currentUser?.user_id === comment.user.user_id;
+  const [isEditing, setIsEditing] = useState(false);
+  const [editContent, setEditContent] = useState(comment.content);
 
   const handleOpenMenu = useCallback(() => {
     setModalVisible(true);
@@ -67,29 +80,21 @@ export default function CommentItem({ comment, onToggleLike, onDelete, onEdit }:
   }, [fadeAnim, slideAnim]);
 
   const handleEdit = useCallback(() => {
-    console.log('handleEdit');
     handleCloseMenu();
-    Alert.prompt(
-      'Edit Comment',
-      'Edit your comment:',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Save',
-          onPress: (newContent?: string) => {
-            if (newContent) {
-              onEdit(comment.comment_id, newContent);
-            }
-          },
-        },
-      ],
-      'plain-text',
-      comment.content
-    );
-  }, [comment.comment_id, comment.content, onEdit]);
+    setIsEditing(true);
+  }, []);
+
+  const handleSubmitEdit = () => {
+    if (editContent.trim() && editContent !== comment.content) {
+      onEdit(comment.comment_id, editContent.trim());
+    }
+    setIsEditing(false);
+  };
+
+  const handleCancelEdit = () => {
+    setEditContent(comment.content);
+    setIsEditing(false);
+  };
 
   const handleDelete = useCallback(() => {
     console.log('handleDelete');
@@ -164,7 +169,41 @@ export default function CommentItem({ comment, onToggleLike, onDelete, onEdit }:
                 </Pressable>
               </View>
             </View>
-            <Text className="mt-1 text-gray-800">{comment.content}</Text>
+            {isEditing ? (
+              <View className="mt-1">
+                <TextInput
+                  className="rounded-lg border border-purple-200 bg-white p-2 text-base text-gray-800"
+                  multiline
+                  value={editContent}
+                  onChangeText={setEditContent}
+                  autoFocus
+                />
+                <View className="mt-2 flex-row justify-end space-x-2">
+                  <Pressable
+                    onPress={handleCancelEdit}
+                    style={{
+                      backgroundColor: '#f3f4f6',
+                      paddingHorizontal: 12,
+                      paddingVertical: 4,
+                      borderRadius: 8,
+                    }}>
+                    <Text className="text-gray-600">Cancel</Text>
+                  </Pressable>
+                  <Pressable
+                    onPress={handleSubmitEdit}
+                    style={{
+                      backgroundColor: '#4b5563',
+                      paddingHorizontal: 12,
+                      paddingVertical: 4,
+                      borderRadius: 8,
+                    }}>
+                    <Text className="text-white">Save</Text>
+                  </Pressable>
+                </View>
+              </View>
+            ) : (
+              <Text className="mt-1 text-gray-800">{comment.content}</Text>
+            )}
           </View>
         </View>
 

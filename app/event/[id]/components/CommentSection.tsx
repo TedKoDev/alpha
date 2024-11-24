@@ -2,13 +2,14 @@ import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { View, Text } from 'react-native';
 
+import CommentItem from './CommentItem';
+
 import { useDeleteComment, useUpdateComment } from '~/queries/hooks/comments/useComments';
 import { useToggleCommentLike } from '~/queries/hooks/useLikes';
-import CommentItem from './CommentItem';
 
 dayjs.extend(relativeTime);
 
-export default function CommentSection({ postId, comments = [] }: any) {
+export default function CommentSection({ postId, comments = [], comment_count }: any) {
   const toggleCommentLikeMutation = useToggleCommentLike();
   const deleteCommentMutation = useDeleteComment();
   const editCommentMutation = useUpdateComment();
@@ -27,9 +28,9 @@ export default function CommentSection({ postId, comments = [] }: any) {
 
   return (
     <View className="mt-4">
-      <Text className="mb-4 text-lg font-bold">Comments ({comments.length})</Text>
+      <Text className="mb-4 text-lg font-bold">Comments ({comment_count})</Text>
 
-      {comments.length === 0 ? (
+      {comment_count === 0 ? (
         <Text className="text-center text-gray-500">No comments yet.</Text>
       ) : (
         comments.map((comment: any) => (
