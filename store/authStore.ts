@@ -1,16 +1,14 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 
-import { checkEmail, getUserInfoApi, loginApi, registerApi } from '../services/authService';
-
-import { api } from '~/services/api';
+import { getUserInfoApi, loginApi, registerApi } from '../services/authService';
 
 interface AuthState {
   isAuthenticated: boolean;
   userInfo?: any;
   userToken?: string;
   login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
+  register: (name: string, email: string, password: string, country_id: number) => Promise<void>;
   logout: () => void;
   checkAuth: () => Promise<void>;
   setUserInfo: (info: any) => void;
@@ -22,9 +20,9 @@ export const useAuthStore = create<AuthState>((set) => ({
   userInfo: undefined,
   userToken: undefined,
 
-  register: async (name: string, email: string, password: string) => {
-    const response = await registerApi(name, email, password);
-    //console.log('register response', response);
+  register: async (name: string, email: string, password: string, country_id: number) => {
+    const response = await registerApi(name, email, password, country_id);
+    console.log('register response', response);
   },
 
   login: async (email: string, password: string) => {

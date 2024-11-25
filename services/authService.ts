@@ -28,10 +28,20 @@ export const loginApi = async (email: string, password: string) => {
   }
 };
 
-export const registerApi = async (name: string, email: string, password: string) => {
+export const registerApi = async (
+  name: string,
+  email: string,
+  password: string,
+  country_id: number
+) => {
   try {
-    const response = await api.post('/auth/register', { name, email, password });
-    //console.log('Register success', response.data);
+    const response = await api.post('/auth/register', {
+      name,
+      email,
+      password,
+      country_id,
+    });
+    console.log('Register success', response.data);
     return response.data;
   } catch (error: any) {
     console.error('Register failed', error);

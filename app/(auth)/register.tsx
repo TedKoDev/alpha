@@ -1,12 +1,20 @@
+import { Ionicons } from '@expo/vector-icons';
 import { Stack, useRouter } from 'expo-router';
 import { debounce } from 'lodash';
 import React, { useState } from 'react';
 import { View, TextInput, Pressable, Text, StyleSheet, FlatList, Modal } from 'react-native';
-import { useCountry } from '~/queries/hooks/utils/useCountry';
-import { Ionicons } from '@expo/vector-icons';
 
+import { useCountry } from '~/queries/hooks/utils/useCountry';
 import { authService } from '~/services/authService';
 import { useAuthStore } from '~/store/authStore';
+
+interface Country {
+  country_id: number;
+  country_code: string;
+  country_name: string;
+  flag_icon: string;
+  user_count: number;
+}
 
 export default function RegisterScreen() {
   const [name, setName] = useState('');
@@ -23,20 +31,19 @@ export default function RegisterScreen() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
-  const { data: country } = useCountry();
-  console.log('country', JSON.stringify(country, null, 2));
-
-  const [selectedCountry, setSelectedCountry] = useState({
+  const [selectedCountry, setSelectedCountry] = useState<Country>({
+    country_id: 1, // Global의 ID
     country_code: 'GL',
     country_name: 'Global',
     flag_icon: '🌎',
+    user_count: 0,
   });
   const [showCountryModal, setShowCountryModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const { data: countries } = useCountry();
 
   const filteredCountries = countries?.filter(
-    (country) =>
+    (country: Country) =>
       country.country_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       country.country_code.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -101,7 +108,7 @@ export default function RegisterScreen() {
 
     try {
       setIsLoading(true);
-      await register(name, email, password);
+      await register(name, email, password, selectedCountry.country_id);
       alert('Registration successful! Please login.');
       router.push('/login');
     } catch (error) {
@@ -127,7 +134,7 @@ export default function RegisterScreen() {
             <Ionicons name="chevron-down" size={24} color="#666" />
           </Pressable>
 
-          <Modal visible={showCountryModal} animationType="slide" transparent={true}>
+          <Modal visible={showCountryModal} animationType="slide" transparent>
             <View style={styles.modalContainer}>
               <View style={styles.modalContent}>
                 <View style={styles.modalHeader}>

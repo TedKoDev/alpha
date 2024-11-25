@@ -184,7 +184,11 @@ export default function MyPage() {
             />
             <View style={styles.userInfo}>
               <Text style={styles.userName}>{userInfo?.username || 'Student'}</Text>
-              <Text style={styles.rankText}>Lv {userInfo?.level || 1}</Text>
+              <View className="flex flex-row items-center">
+                <Text className="country">{userInfo?.country.flag_icon || 'Global'}</Text>
+                <Text className="rankText ml-2 color-red-400">Lv {userInfo?.level || 1}</Text>
+              </View>
+
               <Text style={styles.userEmail}>{userInfo?.email}</Text>
             </View>
             <TouchableOpacity style={styles.editProfileButton} onPress={handleModalOpen}>
