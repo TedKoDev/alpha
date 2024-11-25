@@ -27,6 +27,7 @@ const { width } = Dimensions.get('window');
 export default function EventPage() {
   const { id } = useLocalSearchParams();
   const { data: post, isLoading } = useGetPostById(Number(id));
+
   const [activeIndex, setActiveIndex] = useState(0);
   const togglePostLikeMutation = useTogglePostLike();
 
@@ -69,6 +70,7 @@ export default function EventPage() {
                 username={post.username}
                 createdAt={dayjs(post.created_at).format('YYYY.MM.DD HH:mm')}
                 user_level={post.user_level}
+                flag_icon={post.country_flag_icon}
                 user_profile_picture_url={post.user_profile_picture_url}
               />
 

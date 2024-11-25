@@ -7,6 +7,7 @@ export default function EventListItem({ event }: any) {
   // 삭제되지 않은 미디어만 필터링
   const activeMedia = event.media?.filter((media: any) => media.deleted_at === null) || [];
 
+  console.log('event', JSON.stringify(event, null, 2));
   return (
     <Link href={`/event/${event.post_id}`} asChild>
       <Pressable className="border-b border-gray-200 bg-white p-4">
@@ -19,6 +20,9 @@ export default function EventListItem({ event }: any) {
               transition={200}
             />
             <Text className="ml-2 text-sm text-gray-500">{event.username}</Text>
+
+            <Text className="ml-2 text-xs text-orange-400">{event.flag_icon}</Text>
+
             <Text className="ml-2 text-xs text-orange-400">Lv {event.user_level}</Text>
             <Text className="ml-2 text-sm text-gray-500">
               · {dayjs(event.created_at).format('YY/MMM/DD')}

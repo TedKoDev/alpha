@@ -23,7 +23,8 @@ export default function InstagramStyleItem({ event }: any) {
             <View className="flex-row items-center justify-between">
               <View className="flex-row items-center">
                 <Text className="font-bold">{event.username}</Text>
-                <Text className="ml-2 text-xs text-orange-400">Lv {event.user_level}</Text>
+                <Text className="ml-2 text-xs text-orange-400">{event.flag_icon}</Text>
+                <Text className="ml-1 text-xs text-orange-400">Lv {event.user_level}</Text>
               </View>
               <Text className="text-xs text-gray-500">
                 {dayjs(event.created_at).format('YY/MMM/DD')}
