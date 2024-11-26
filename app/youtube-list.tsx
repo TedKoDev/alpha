@@ -1,20 +1,20 @@
 import * as Linking from 'expo-linking';
 import { Stack } from 'expo-router';
 import { useState } from 'react';
-import { View, Text, ScrollView, Image, Pressable, Modal, ActivityIndicator } from 'react-native';
-import YoutubePlayer from 'react-native-youtube-iframe';
+import { View, Text, ScrollView, Image, Pressable, ActivityIndicator } from 'react-native';
 
+import YoutubePlayerModal from '~/components/youtube/YoutubePlayerModal';
 import { useYoutubeLinks } from '~/queries/hooks/youtube/useYoutubeLinks';
 
 export default function YoutubeList() {
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
-  const { data: youtubeItems, isLoading, error } = useYoutubeLinks();
+  const { data: youtubeItems, isLoading: youtubeLinkLoading, error } = useYoutubeLinks();
 
   const handleSubscribe = (channelId: string) => {
     Linking.openURL(`https://www.youtube.com/channel/${channelId}?sub_confirmation=1`);
   };
 
-  if (isLoading) {
+  if (youtubeLinkLoading) {
     return (
       <View className="flex-1 items-center justify-center">
         <ActivityIndicator />
@@ -34,7 +34,7 @@ export default function YoutubeList() {
     <ScrollView className="bg-white">
       <Stack.Screen
         options={{
-          headerTitle: '카페 vlog 📸',
+          headerTitle: 'YouTube 📸',
         }}
       />
       <View className="p-4">
@@ -52,26 +52,17 @@ export default function YoutubeList() {
               <Text className="text-gray-500">{item.channel}</Text>
             </Pressable>
 
-            <Pressable
+            {/* <Pressable
               onPress={() => handleSubscribe(item.channelId)}
               className="mt-2 self-start rounded-full bg-red-600 px-4 py-1.5">
               <Text className="text-sm font-medium text-white">구독하기</Text>
-            </Pressable>
+            </Pressable> */}
           </View>
         ))}
       </View>
-
-      <Modal
-        visible={!!selectedVideo}
-        onRequestClose={() => setSelectedVideo(null)}
-        animationType="slide">
-        <View className="flex-1 bg-black">
-          <YoutubePlayer height={300} videoId={selectedVideo!} play />
-          <Pressable className="absolute right-5 top-10" onPress={() => setSelectedVideo(null)}>
-            <Text className="text-lg text-white">닫기</Text>
-          </Pressable>
-        </View>
-      </Modal>
+      <View className="mt-10">
+        <YoutubePlayerModal videoId={selectedVideo} onClose={() => setSelectedVideo(null)} />
+      </View>
     </ScrollView>
   );
 }

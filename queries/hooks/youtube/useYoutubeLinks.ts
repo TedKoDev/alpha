@@ -1,11 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
-
 import { youtubeService } from '~/services/youtubeService';
 
 // videoId 추출 유틸 함수
 const getYoutubeVideoId = (url: string) => {
-  const regex =
-    /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+  const regex = /(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^?&]+)/;
   const match = url.match(regex);
   return match ? match[1] : '';
 };
@@ -21,7 +19,7 @@ export interface YoutubeItem {
 
 const CHANNEL_INFO = {
   id: 'UCnV92PH-m2oxVD-jXIggNkQ',
-  name: '베라한국어-BelaKorean',
+  name: 'Melody Note 멜로디노트',
 };
 
 export const useYoutubeLinks = () => {
@@ -37,13 +35,16 @@ export const useYoutubeLinks = () => {
         return {
           id: `${videoId}-${index}`,
           videoId,
-          title: '카페 재즈',
+          title: '카페 브이로그',
           channel: CHANNEL_INFO.name,
           channelId: CHANNEL_INFO.id,
-          thumbnail: `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`,
+          thumbnail: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
         };
       });
     },
+    staleTime: 1000 * 60 * 5, // 5분간 데이터가 신선하다고 간주
+
+    refetchOnWindowFocus: false,
   });
 };
 
