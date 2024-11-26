@@ -1,8 +1,8 @@
 import { api } from './api';
 
-interface CountryResponse {
-  status: string;
-  data: any[]; // 실제 country 타입으로 수정하는 것이 좋습니다
+interface CheckResponse {
+  available: boolean;
+  message: string;
 }
 
 export const getCountryListApi = async () => {
@@ -56,15 +56,55 @@ export const registerApi = async (
   }
 };
 
-export const checkEmail = async (email: string): Promise<boolean> => {
-  // 이메일 형식 검증
+export const checkEmailApi = async (email: string): Promise<CheckResponse> => {
+  try {
+    const response = await api.post('/auth/check-email', { email });
+    return response.data;
+  } catch (error: any) {
+    if (error.response?.status === 409) {
+      throw new Error('email already taken');
+    }
+    throw new Error('email check failed');
+  }
+};
+
+export const checkNameApi = async (name: string): Promise<CheckResponse> => {
+  try {
+    const response = await api.post('/auth/check-name', { name });
+    return response.data;
+  } catch (error: any) {
+    if (error.response?.status === 409) {
+      throw new Error('name already taken');
+    }
+    throw new Error('name check failed');
+  }
+};
+
+export const validateEmail = (email: string): boolean => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
 };
 
-export const checkName = async (name: string): Promise<boolean> => {
-  // 이름 길이 검증 (2글자 이상)
+export const validateName = (name: string): boolean => {
   return name.length >= 2;
+};
+
+export const checkEmail = async (email: string): Promise<boolean> => {
+  if (!validateEmail(email)) {
+    throw new Error('Please enter a valid email address');
+  }
+
+  const response = await checkEmailApi(email);
+  return response.available;
+};
+
+export const checkName = async (name: string): Promise<boolean> => {
+  if (!validateName(name)) {
+    throw new Error('Name must be at least 2 characters long');
+  }
+
+  const response = await checkNameApi(name);
+  return response.available;
 };
 
 export const getUserInfoApi = async (token: string) => {

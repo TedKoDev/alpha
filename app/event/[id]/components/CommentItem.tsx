@@ -154,6 +154,12 @@ export default function CommentItem({ comment, onToggleLike, onDelete, onEdit }:
             <View className="flex-row items-center justify-between">
               <View className="flex-row items-center">
                 <Text className="font-bold">{comment.user?.username}</Text>
+                {/* 유저 지역 표시 */}
+                <Text className="ml-2 text-xs text-gray-500">
+                  {comment.user?.country?.flag_icon}
+                </Text>
+                <Text className="ml-1 text-xs text-red-500">Lv {comment.user?.level}</Text>
+
                 <Text className="ml-2 text-xs text-gray-500">
                   {dayjs(comment.created_at).fromNow()}
                 </Text>

@@ -24,24 +24,47 @@ export interface PostParams {
   limit?: number;
   sort?: 'latest' | 'oldest' | 'popular';
   type?: PostType;
+  admin_pick?: boolean;
 }
 
-export interface MediaDto {
-  media_id?: number;
-  mediaUrl: string; // snake_case -> camelCase
-  mediaType: 'IMAGE' | 'VIDEO'; // snake_case -> camelCase
-}
+// export interface MediaDto {
+//   media_id?: number;
+//   mediaUrl: string; // snake_case -> camelCase
+//   mediaType: 'IMAGE' | 'VIDEO'; // snake_case -> camelCase
+// }
 // GET API
-export const getPostApi = async (params?: PostParams) => {
+
+interface GetPostsParams {
+  page: number;
+  limit: number;
+  sort: 'latest' | 'oldest' | 'popular';
+  type?: string;
+  admin_pick?: boolean;
+  topic_id?: number;
+  category_id?: number;
+}
+
+export const getPostApi = async ({
+  page,
+  limit,
+  sort,
+  type,
+  admin_pick,
+  topic_id,
+  category_id,
+}: GetPostsParams) => {
   try {
     const token = useAuthStore.getState().userToken;
-
-    if (!token) {
-      throw new Error('No token found');
-    }
-
-    const response = await api.get('/posts/', {
-      params,
+    const response = await api.get('/posts', {
+      params: {
+        page,
+        limit,
+        sort,
+        type,
+        admin_pick,
+        topic_id,
+        category_id,
+      },
       headers: {
         Authorization: `Bearer ${token}`,
       },

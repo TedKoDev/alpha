@@ -14,22 +14,6 @@ export function useUserInfo() {
   const setUserInfo = useAuthStore((state) => state.setUserInfo);
   const queryClient = useQueryClient();
 
-  React.useEffect(() => {
-    const fetchUserInfo = async () => {
-      if (token) {
-        try {
-          const response = await getUserInfoApi(token);
-          setUserInfo(response);
-          queryClient.setQueryData(['userInfo'], response);
-        } catch (error) {
-          console.error('Failed to fetch user info:', error);
-        }
-      }
-    };
-
-    fetchUserInfo();
-  }, [token]);
-
   return useQuery<UserInfo>({
     queryKey: ['userInfo'],
     queryFn: async () => {
@@ -39,9 +23,8 @@ export function useUserInfo() {
       return response;
     },
     enabled: !!token,
-    staleTime: Infinity, // Set to a high value to avoid frequent refetching
-    // cacheTime is removed as it is not a valid option
-    refetchOnMount: 'always',
+    staleTime: 0,
+    refetchOnMount: true,
     refetchOnWindowFocus: true,
   });
 }

@@ -34,8 +34,8 @@ export default function LessonCard({ onMorePress, participationCount = 0, points
     type: 'SENTENCE',
   });
 
-  console.log('posts', posts);
-  console.log('participationLogs', participationLogs);
+  // console.log('posts', posts);
+  // console.log('participationLogs', participationLogs);
 
   //console.log('Current Auth Store:', useAuthStore.getState());
   //console.log('Current userInfo in LessonCard:', userInfo);

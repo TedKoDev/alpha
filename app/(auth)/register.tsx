@@ -54,16 +54,18 @@ export default function RegisterScreen() {
       setIsNameValid(false);
       return;
     }
-    // setIsCheckingName(true);
+
     try {
       const available = await authService.checkName(name);
       setIsNameValid(available);
-      setNameError(available ? '' : 'This name is already taken. Please choose a different name.');
+      setNameError(available ? '' : 'This name is already taken.');
     } catch (error) {
-      console.error('Name check failed:', error);
-      setNameError('Failed to check name availability. Please try again.');
-    } finally {
-      // setIsCheckingName(false);
+      if (error instanceof Error) {
+        setNameError(error.message);
+      } else {
+        setNameError('Failed to check name availability.');
+      }
+      setIsNameValid(false);
     }
   }, 500);
 
@@ -77,12 +79,14 @@ export default function RegisterScreen() {
     try {
       const available = await authService.checkEmail(email);
       setIsEmailValid(available);
-      setEmailError(
-        available ? '' : 'This email is already registered. Please use a different email address.'
-      );
+      setEmailError(available ? '' : 'This email is already registered.');
     } catch (error) {
-      console.error('Email check failed:', error);
-      setEmailError('Failed to check email availability. Please try again.');
+      if (error instanceof Error) {
+        setEmailError(error.message);
+      } else {
+        setEmailError('Failed to check email availability.');
+      }
+      setIsEmailValid(false);
     } finally {
       setIsCheckingEmail(false);
     }

@@ -25,22 +25,21 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { useUpdateProfile } from '~/queries/hooks/auth/useUpdateProfile';
-import { useUserInfo } from '~/queries/hooks/auth/useUserinfo';
 import { getPresignedUrlApi, uploadFileToS3 } from '~/services/s3Service';
 import { useAuthStore } from '~/store/authStore';
 
 export default function MyPage() {
   const { logout } = useAuthStore();
+  const userInfo = useAuthStore((state) => state.userInfo);
   const updateProfileMutation = useUpdateProfile();
-  const { data: userInfo }: any = useUserInfo();
 
-  console.log('userInfo', userInfo);
+  console.log('userInfo from store', userInfo);
 
   const [modalVisible, setModalVisible] = useState(false);
   const [editedProfile, setEditedProfile] = useState({
     username: '',
     bio: '',
-    profilePictureUrl: '',
+    profile_picture_url: '',
   });
 
   useEffect(() => {
@@ -48,7 +47,7 @@ export default function MyPage() {
       setEditedProfile({
         username: userInfo.username || '',
         bio: userInfo.bio || '',
-        profilePictureUrl: userInfo.profile_picture_url || '',
+        profile_picture_url: userInfo.profile_picture_url || '',
       });
     }
   }, [userInfo]);
@@ -58,7 +57,7 @@ export default function MyPage() {
       setEditedProfile({
         username: userInfo.username || '',
         bio: userInfo.bio || '',
-        profilePictureUrl: userInfo.profile_picture_url || '',
+        profile_picture_url: userInfo.profile_picture_url || '',
       });
     }
     setModalVisible(true);
@@ -99,7 +98,7 @@ export default function MyPage() {
 
           setEditedProfile((prev) => ({
             ...prev,
-            profilePictureUrl: imageUrl,
+            profile_picture_url: imageUrl,
           }));
         } catch (error) {
           console.error('Failed to upload image:', error);
@@ -122,7 +121,7 @@ export default function MyPage() {
         userId: Number(userInfo.user_id),
         username: editedProfile.username.trim(),
         bio: editedProfile.bio?.trim() || '',
-        profilePictureUrl: editedProfile.profilePictureUrl || '',
+        profile_picture_url: editedProfile.profile_picture_url || '',
       };
 
       console.log('Updating profile with:', updateData);
@@ -185,7 +184,7 @@ export default function MyPage() {
             <View style={styles.userInfo}>
               <Text style={styles.userName}>{userInfo?.username || 'Student'}</Text>
               <View className="flex flex-row items-center">
-                <Text className="country">{userInfo?.country.flag_icon || 'Global'}</Text>
+                <Text className="country">{userInfo?.country?.flag_icon || 'Global'}</Text>
                 <Text className="rankText ml-2 color-red-400">Lv {userInfo?.level || 1}</Text>
               </View>
 
@@ -284,7 +283,7 @@ export default function MyPage() {
                   <View style={styles.profileImageSection}>
                     <Image
                       source={{
-                        uri: editedProfile.profilePictureUrl || 'https://via.placeholder.com/100',
+                        uri: editedProfile.profile_picture_url || 'https://via.placeholder.com/100',
                       }}
                       style={styles.modalProfileImage}
                     />

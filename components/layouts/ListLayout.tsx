@@ -9,24 +9,27 @@ import {
   RefreshControl,
   ActivityIndicator,
   Pressable,
+  StyleProp,
+  ViewStyle,
 } from 'react-native';
 
 import EventListingItem from '~/components/EventListingItem';
 import InstagramStyleItem from '~/components/InstagramStyleItem';
 
-type ListLayoutProps = {
+interface ListLayoutProps {
   headerTitle: string;
   data: any[];
   showViewToggle?: boolean;
+  showWriteButton?: boolean;
+  hideButton?: boolean;
   isLoading?: boolean;
   onLoadMore?: () => void;
-  onRefresh?: () => void;
+  onRefresh?: () => Promise<any>;
   isRefreshing?: boolean;
-  hideButton?: boolean;
-  showWriteButton?: boolean;
-  writeRoute?: string;
-  hideHeader?: boolean;
-};
+  ListHeaderComponent?: React.ReactElement;
+  ListEmptyComponent?: React.ReactElement;
+  contentContainerStyle?: StyleProp<ViewStyle>;
+}
 
 export default function ListLayout({
   headerTitle,
@@ -40,6 +43,10 @@ export default function ListLayout({
   showWriteButton = false,
   writeRoute = '/write',
   hideHeader = false,
+  onScroll,
+  ListHeaderComponent,
+  ListEmptyComponent,
+  contentContainerStyle,
 }: ListLayoutProps) {
   const router = useRouter();
   const [viewMode, setViewMode] = useState<'list' | 'instagram'>('list');
@@ -156,7 +163,7 @@ export default function ListLayout({
           )
         }
         keyExtractor={(item) => item.post_id}
-        ItemSeparatorComponent={() => <View className="h-[1px] bg-gray-100" />}
+        ItemSeparatorComponent={() => <View className="h-[1px] bg-white" />}
         onEndReached={onLoadMore}
         onEndReachedThreshold={0.5}
         refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />}
@@ -167,6 +174,11 @@ export default function ListLayout({
             </View>
           ) : null
         }
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+        ListHeaderComponent={ListHeaderComponent}
+        ListEmptyComponent={ListEmptyComponent}
+        contentContainerStyle={contentContainerStyle}
       />
     </View>
   );

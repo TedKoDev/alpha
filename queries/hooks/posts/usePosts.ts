@@ -29,6 +29,9 @@ type UsePostsParams = {
   limit: number;
   sort: string;
   type?: string;
+  admin_pick?: boolean;
+  topicId: number | undefined;
+  categoryId: number | undefined;
 };
 
 export function usePosts(params: UsePostsParams) {
@@ -40,6 +43,7 @@ export function usePosts(params: UsePostsParams) {
         page: pageParam,
         sort: params.sort as 'latest' | 'oldest' | 'popular',
         type: params.type as 'SENTENCE' | 'COLUMN' | 'QUESTION' | 'GENERAL',
+        admin_pick: params.admin_pick,
       }),
     getNextPageParam: (lastPage, allPages) => {
       const nextPage = allPages.length + 1;

@@ -48,6 +48,7 @@ export const useCreateComment = () => {
         queryClient.invalidateQueries({ queryKey: ['posts'] }),
         queryClient.refetchQueries({ queryKey: ['posts'] }),
         queryClient.invalidateQueries({ queryKey: ['comments', variables.postId] }),
+        queryClient.refetchQueries({ queryKey: ['comments', variables.postId] }),
         queryClient.invalidateQueries({ queryKey: ['userInfo'] }),
         queryClient.refetchQueries({ queryKey: ['userInfo'] }),
       ]);
@@ -81,6 +82,64 @@ export const useUpdateComment = () => {
       commentService.updateComment(commentId, content),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['comments'] });
+    },
+  });
+};
+
+export const useToggleCommentLike = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: commentService.toggleCommentLike,
+    onSuccess: async (_, commentId) => {
+      // 댓글이 속한 게시물의 ID를 알아야 정확한 쿼리 무효화가 가능합니다
+      // 현재 캐시된 데이터에서 해당 댓글의 게시물 ID를 찾습니다
+      const queries = queryClient.getQueriesData<any>({ queryKey: ['comments'] });
+
+      for (const [queryKey] of queries) {
+        const [_, postId] = queryKey;
+        if (postId) {
+          await Promise.all([
+            queryClient.invalidateQueries({ queryKey: ['comments', postId] }),
+            queryClient.refetchQueries({ queryKey: ['comments', postId] }),
+          ]);
+        }
+      }
+
+      // 관련된 다른 쿼리들도 업데이트
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['post'] }),
+        queryClient.invalidateQueries({ queryKey: ['posts'] }),
+        queryClient.invalidateQueries({ queryKey: ['userInfo'] }),
+      ]);
+    },
+    // 낙관적 업데이트를 위한 옵션 (선택사항)
+    onMutate: async (commentId) => {
+      // 현재 캐시된 데이터에서 해당 댓글을 찾아 좋아요 상태를 즉시 토글
+      const queries = queryClient.getQueriesData<any>({ queryKey: ['comments'] });
+
+      for (const [queryKey, data] of queries) {
+        if (data?.pages) {
+          const updatedPages = data.pages.map((page: any) => ({
+            ...page,
+            data: page.data.map((comment: any) => {
+              if (comment.comment_id === commentId) {
+                return {
+                  ...comment,
+                  user_liked: !comment.user_liked,
+                  likes: comment.user_liked ? comment.likes - 1 : comment.likes + 1,
+                };
+              }
+              return comment;
+            }),
+          }));
+
+          queryClient.setQueryData(queryKey, {
+            ...data,
+            pages: updatedPages,
+          });
+        }
+      }
     },
   });
 };

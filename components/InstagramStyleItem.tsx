@@ -7,7 +7,7 @@ import { View, Text, Pressable } from 'react-native';
 
 export default function InstagramStyleItem({ event }: any) {
   // 삭제되지 않은 미디어만 필터링
-  const activeMedia = event.media?.filter((media) => media.deleted_at === null) || [];
+  const activeMedia = event.media?.filter((media: any) => media.deleted_at === null) || [];
 
   return (
     <Link href={`/event/${event.post_id}`} asChild>
