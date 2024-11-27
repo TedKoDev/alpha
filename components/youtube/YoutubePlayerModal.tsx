@@ -13,82 +13,48 @@ interface Props {
 export default function YoutubePlayerModal({ videoId, onClose }: Props) {
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
-  const [loadingTimeout, setLoadingTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [key, setKey] = useState(0);
+  const [playerReady, setPlayerReady] = useState(false);
 
-  // 컴포넌트 언마운트 시 타이머 정리
   useEffect(() => {
     return () => {
-      if (loadingTimeout) {
-        clearTimeout(loadingTimeout);
-      }
-    };
-  }, [loadingTimeout]);
-
-  // videoId가 변경될 때마다 상태 초기화
-  useEffect(() => {
-    if (videoId) {
+      setPlayerReady(false);
       setIsLoading(true);
       setIsError(false);
-
-      // 15초 후에도 로딩이 완료되지 않으면 에러 처리
-      const timeout = setTimeout(() => {
-        setIsLoading(false);
-        setIsError(true);
-      }, 3000);
-
-      setLoadingTimeout(timeout);
-    }
-
-    return () => {
-      if (loadingTimeout) {
-        clearTimeout(loadingTimeout);
-      }
     };
-  }, [videoId]);
-
-  const handleExternalOpen = useCallback((id: string) => {
-    const youtubeUrl = `vnd.youtube://${id}`;
-    const webUrl = `https://www.youtube.com/watch?v=${id}`;
-
-    Linking.canOpenURL(youtubeUrl)
-      .then((supported) => {
-        if (supported) {
-          return Linking.openURL(youtubeUrl);
-        }
-        return Linking.openURL(webUrl);
-      })
-      .catch(() => Linking.openURL(webUrl));
   }, []);
 
-  const onError = useCallback(() => {
+  useEffect(() => {
+    if (videoId) {
+      console.log('Video ID changed:', videoId);
+      setIsLoading(true);
+      setIsError(false);
+      setKey(Date.now());
+    }
+  }, [videoId]);
+
+  const onError = useCallback((error: any) => {
+    console.log('YouTube Player Error:', error);
     setIsError(true);
     setIsLoading(false);
-    if (loadingTimeout) {
-      clearTimeout(loadingTimeout);
-    }
-  }, [loadingTimeout]);
+  }, []);
 
   const onReady = useCallback(() => {
+    console.log('YouTube Player Ready');
+    setPlayerReady(true);
     setIsLoading(false);
     setIsError(false);
-    if (loadingTimeout) {
-      clearTimeout(loadingTimeout);
-    }
-  }, [loadingTimeout]);
+  }, []);
 
-  const handleRetry = useCallback(() => {
-    if (!videoId) return;
-    setIsError(false);
-    setIsLoading(true);
-
-    // 재시도 시에도 타임아웃 설정
-    const timeout = setTimeout(() => {
-      setIsLoading(false);
-      setIsError(true);
-    }, 5000);
-
-    setLoadingTimeout(timeout);
-  }, [videoId]);
+  const handleWebViewLoad = useCallback(() => {
+    console.log('WebView Load Complete');
+    setTimeout(() => {
+      if (!playerReady) {
+        console.log('Retrying player initialization...');
+        setKey(Date.now());
+      }
+    }, 3000);
+  }, [playerReady]);
 
   return (
     <Modal visible={!!videoId} onRequestClose={onClose} animationType="fade" statusBarTranslucent>
@@ -112,18 +78,68 @@ export default function YoutubePlayerModal({ videoId, onClose }: Props) {
 
         {videoId && (
           <View className="flex-1 justify-center">
-            {isLoading && (
+            <View key={key} className="h-[300px] bg-black">
+              <YoutubePlayer
+                height={300}
+                play={playerReady && !isLoading && !isError}
+                videoId={videoId}
+                onReady={onReady}
+                onError={onError}
+                onChangeState={(state) => {
+                  console.log('Player State:', state);
+                }}
+                initialPlayerParams={{
+                  preventFullScreen: false,
+                  showClosedCaptions: false,
+                  modestbranding: true,
+                  rel: false,
+                  controls: true,
+                  autoplay: 1,
+                }}
+                webViewProps={{
+                  androidLayerType: Platform.select({
+                    android: 'hardware',
+                    ios: undefined,
+                  }),
+                  startInLoadingState: true,
+                  javaScriptEnabled: true,
+                  domStorageEnabled: true,
+                  allowsInlineMediaPlayback: true,
+                  mediaPlaybackRequiresUserAction: false,
+                  onLoadStart: () => {
+                    console.log('WebView LoadStart');
+                    if (!playerReady) {
+                      setIsLoading(true);
+                    }
+                  },
+                  onLoad: handleWebViewLoad,
+                  onError: (syntheticEvent) => {
+                    console.log('WebView Error:', syntheticEvent.nativeEvent);
+                    setIsError(true);
+                    setIsLoading(false);
+                  },
+                }}
+              />
+            </View>
+
+            {(isLoading || !playerReady) && (
               <View className="absolute inset-0 z-10 items-center justify-center bg-black">
                 <ActivityIndicator size="large" color="white" />
               </View>
             )}
 
-            {isError ? (
-              <View className="items-center justify-center p-4">
+            {isError && (
+              <View className="absolute inset-0 z-10 items-center justify-center bg-black">
                 <Text className="mb-4 text-center text-white">
                   동영상을 불러오는데 실패했습니다.
                 </Text>
-                <Pressable onPress={handleRetry} className="mb-4 rounded-full bg-white px-6 py-2">
+                <Pressable
+                  onPress={() => {
+                    setIsError(false);
+                    setIsLoading(true);
+                    setKey((prev) => prev + 1);
+                  }}
+                  className="mb-4 rounded-full bg-white px-6 py-2">
                   <Text className="font-medium">다시 시도</Text>
                 </Pressable>
                 <Pressable
@@ -132,21 +148,6 @@ export default function YoutubePlayerModal({ videoId, onClose }: Props) {
                   <Text className="font-medium text-white">브라우저에서 열기</Text>
                 </Pressable>
               </View>
-            ) : (
-              <YoutubePlayer
-                height={300}
-                play
-                videoId={videoId}
-                onReady={onReady}
-                onError={onError}
-                initialPlayerParams={{
-                  preventFullScreen: false,
-                  // cc_lang_pref: 'kr',
-                  showClosedCaptions: false,
-                  modestbranding: true,
-                  rel: false,
-                }}
-              />
             )}
           </View>
         )}

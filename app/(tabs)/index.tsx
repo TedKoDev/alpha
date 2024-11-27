@@ -5,6 +5,7 @@ import { View, Text, ScrollView, RefreshControl } from 'react-native';
 
 import maincarousel from '~/assets/dummy/maincarousel.json';
 import BoardTabs from '~/components/board/BoardTabs';
+import BelaPick from '~/components/board/belapick';
 import CustomCarousel from '~/components/customCarousel';
 import GrayLine from '~/components/grayline';
 import MenuCards from '~/components/home/MenuCards';

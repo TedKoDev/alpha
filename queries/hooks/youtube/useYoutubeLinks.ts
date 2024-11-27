@@ -19,7 +19,7 @@ export interface YoutubeItem {
 
 const CHANNEL_INFO = {
   id: 'UCnV92PH-m2oxVD-jXIggNkQ',
-  name: 'Melody Note 멜로디노트',
+  name: '베라한국어',
 };
 
 export const useYoutubeLinks = () => {
@@ -32,6 +32,7 @@ export const useYoutubeLinks = () => {
 
       return uniqueLinks.map((link, index): YoutubeItem => {
         const videoId = getYoutubeVideoId(link);
+        console.log('VideoId', videoId);
         return {
           id: `${videoId}-${index}`,
           videoId,

@@ -7,9 +7,11 @@ import { useYoutubeLinks } from '~/queries/hooks/youtube/useYoutubeLinks';
 
 export default function YoutubeSection() {
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
+  console.log('selectedViedeo', selectedVideo);
   const { data: youtubeItems, isLoading: youtubeLinkLoading, error } = useYoutubeLinks();
 
   const handleVideoPress = useCallback((videoId: string) => {
+    console.log('pressed ', videoId);
     setSelectedVideo(videoId);
   }, []);
 
