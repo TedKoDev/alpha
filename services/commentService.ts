@@ -76,6 +76,7 @@ export const commentService = {
 
   // 댓글 삭제
   deleteComment: async (commentId: number) => {
+    console.log('deleteComment', commentId);
     const token = useAuthStore.getState().userToken;
     if (!token) {
       throw new Error('No token found');

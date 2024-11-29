@@ -1,17 +1,51 @@
-import { Ionicons } from '@expo/vector-icons';
-import { format, formatDate } from 'date-fns';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { format } from 'date-fns';
 import { Image } from 'expo-image';
-import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
+  Alert,
+  TextInput,
+} from 'react-native';
+
+import ConsultationCommentSection from './components/ConsultationCommentSection';
+import EditCommentModal from '../event/[id]/components/EditCommentModal';
+
+import {
+  useCreateComment,
+  useDeleteComment,
+  useUpdateComment,
+} from '~/queries/hooks/comments/useComments';
 import { useConsultationById } from '~/queries/hooks/posts/useConsultations';
-import { getStatusText } from '~/types/consultation';
+import { commentService } from '~/services/commentService';
+import { useAuthStore } from '~/store/authStore';
+import { getStatusColor, getStatusText } from '~/types/consultation';
 
 export default function ConsultationDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { data: consultation, isLoading } = useConsultationById(Number(id));
+
+  console.log('consultation', consultation);
+
+  const { userInfo } = useAuthStore();
+  console.log('userInfo', userInfo);
+  const createCommentMutation = useCreateComment();
+  const deleteCommentMutation = useDeleteComment();
+  const updateCommentMutation = useUpdateComment();
+
+  const [newComment, setNewComment] = useState('');
+  const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
+  const [editingCommentContent, setEditingCommentContent] = useState('');
+
+  const isAuthor = userInfo?.user_id === consultation?.user_id;
+  const isTeacher = userInfo?.role === 'TEACHER';
 
   if (isLoading) {
     return (
@@ -29,6 +63,74 @@ export default function ConsultationDetailScreen() {
     );
   }
 
+  const handleCommentSubmit = async (comment_id: any, content: any) => {
+    if (!newComment.trim()) {
+      Alert.alert('알림', '댓글을 입력해주세요.');
+      return;
+    }
+    try {
+      await createCommentMutation.mutateAsync({
+        postId: consultation.post_id,
+        content: newComment.trim(),
+      });
+      setNewComment('');
+    } catch (error) {
+      Alert.alert('오류', '댓글 작성에 실패했습니다.');
+    }
+  };
+
+  const handleCommentDelete = async (commentId: number) => {
+    Alert.alert('댓글 삭제', '정말 삭제하시겠습니까?', [
+      { text: '취소', style: 'cancel' },
+      {
+        text: '삭제',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await deleteCommentMutation.mutateAsync(commentId);
+          } catch (error) {
+            Alert.alert('오류', '댓글 삭제에 실패했습니다.');
+          }
+        },
+      },
+    ]);
+  };
+
+  const handleEditSubmit = async (newContent: string) => {
+    if (!editingCommentId || !newContent.trim()) {
+      Alert.alert('알림', '댓글 내용을 입력해주세요.');
+      return;
+    }
+    try {
+      await updateCommentMutation.mutateAsync({
+        commentId: editingCommentId,
+        content: newContent.trim(),
+      });
+      setEditingCommentId(null);
+      setEditingCommentContent('');
+    } catch (error) {
+      Alert.alert('오류', '댓글 수정에 실패했습니다.');
+    }
+  };
+
+  const handlePostDelete = () => {
+    Alert.alert('게시글 삭제', '정말 삭제하시겠습니까?', [
+      { text: '취소', style: 'cancel' },
+      {
+        text: '삭제',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            // 게시글 삭제 API 호출
+            router.back();
+          } catch (error) {
+            Alert.alert('오류', '게시글 삭제에 실패했습니다.');
+          }
+        },
+      },
+    ]);
+  };
+
   return (
     <>
       <Stack.Screen
@@ -40,6 +142,18 @@ export default function ConsultationDetailScreen() {
               <Ionicons name="chevron-back" size={24} color="#B227D4" />
             </TouchableOpacity>
           ),
+          headerRight: isAuthor
+            ? () => (
+                <View className="mr-4 flex-row">
+                  <TouchableOpacity onPress={() => router.push(`/consultations/${id}/edit`)}>
+                    <MaterialIcons name="edit" size={24} color="#B227D4" />
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={handlePostDelete} className="ml-4">
+                    <MaterialIcons name="delete" size={24} color="#B227D4" />
+                  </TouchableOpacity>
+                </View>
+              )
+            : undefined,
         }}
       />
       <ScrollView className="flex-1 bg-white">
@@ -53,13 +167,8 @@ export default function ConsultationDetailScreen() {
                 contentFit="cover"
               />
               <View className="ml-3">
-                <View className="flex-row items-center">
-                  <Text className="font-bold">{consultation.username}</Text>
-                  <Text className="ml-2 text-sm text-gray-500">Lv.{consultation.user_level}</Text>
-                </View>
-                <Text className="text-sm text-gray-500">
-                  {format(new Date(consultation.created_at), 'yyyy.MM.dd HH:mm')}
-                </Text>
+                <Text className="font-bold">{consultation.username}</Text>
+                <Text className="text-sm text-gray-500">Lv.{consultation.user_level}</Text>
               </View>
             </View>
             <Text className="text-2xl">{consultation.country_flag_icon}</Text>
@@ -68,46 +177,49 @@ export default function ConsultationDetailScreen() {
 
         {/* 상담 내용 */}
         <View className="p-4">
-          <Text className="mb-2 text-2xl font-bold">{consultation.post_content.title}</Text>
-
-          {/* 상담 정보 */}
-          <View className="mb-4 rounded-lg bg-gray-100 p-4">
-            <View className="mb-2 flex-row items-center justify-between">
-              <Text className="text-gray-600">상담 비용</Text>
-              <Text className="text-lg font-bold text-purple-500">
-                {consultation.post_content.price.toLocaleString()} P
-              </Text>
-            </View>
-            <View className="mb-2 flex-row items-center justify-between">
-              <Text className="text-gray-600">상담 상태</Text>
-              <Text className="font-bold text-blue-500">
-                {getStatusText(consultation.post_content.status)}
-              </Text>
-            </View>
-            <View className="flex-row items-center justify-between">
-              <Text className="text-gray-600">상담 유형</Text>
-              <Text className="font-bold text-gray-700">{consultation.category_name}</Text>
+          {/* 상태 및 제목 */}
+          <View className="mb-4 flex-row items-center justify-between">
+            <Text className="text-2xl font-bold">{consultation.post_content.title}</Text>
+            <View
+              className={`rounded-full px-4 py-2 ${getStatusColor(consultation.post_content.status)}`}>
+              <Text className="font-medium">{getStatusText(consultation.post_content.status)}</Text>
             </View>
           </View>
 
-          {/* 이미지 */}
-          {consultation.media && consultation.media.length > 0 && (
-            <ScrollView horizontal className="mb-4" showsHorizontalScrollIndicator={false}>
-              {consultation.media.map((media, index) => (
-                <Image
-                  key={index}
-                  source={{ uri: media.media_url }}
-                  className="mr-2 h-40 w-40 rounded-lg"
-                  contentFit="cover"
-                />
-              ))}
-            </ScrollView>
-          )}
+          {/* 카테고리 및 가격 정보 */}
+          <View className="mb-4 rounded-lg bg-gray-50 p-3">
+            <View className="flex-row items-center justify-between border-b border-gray-200 pb-2">
+              <Text className="text-gray-600">카테고리</Text>
+              <Text className="font-medium">{consultation.category_name}</Text>
+            </View>
+            <View className="mt-2 flex-row items-center justify-between">
+              <Text className="text-gray-600">상담 비용</Text>
+              <Text className="font-bold text-purple-500">{consultation.post_content.price} P</Text>
+            </View>
+          </View>
 
           {/* 상담 내용 */}
-          <Text className="text-base leading-6 text-gray-800">
-            {consultation.post_content.content}
-          </Text>
+          <View className="rounded-lg bg-white p-4">
+            <Text className="text-base leading-6 text-gray-800">
+              {consultation.post_content.content}
+            </Text>
+          </View>
+
+          {/* 이미지가 있는 경우 이미지 표시 */}
+          {consultation.post_content.images && consultation.post_content.images.length > 0 && (
+            <View className="mt-4">
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                {consultation.post_content.images.map((image, index) => (
+                  <Image
+                    key={index}
+                    source={{ uri: image.url }}
+                    className="mr-2 h-40 w-40 rounded-lg"
+                    contentFit="cover"
+                  />
+                ))}
+              </ScrollView>
+            </View>
+          )}
         </View>
 
         {/* 선생님 정보 (있는 경우) */}
@@ -138,37 +250,39 @@ export default function ConsultationDetailScreen() {
         )}
 
         {/* 댓글 섹션 */}
-        <View className="mt-4 border-t border-gray-200 p-4">
-          <Text className="mb-4 text-lg font-bold">댓글</Text>
-          {consultation.comments && consultation.comments.length > 0 ? (
-            consultation.comments.map((comment, index) => (
-              <View key={index} className="mb-4 border-b border-gray-100 pb-4 last:border-b-0">
-                <View className="flex-row items-center justify-between">
-                  <View className="flex-row items-center">
-                    <Image
-                      source={{ uri: comment.user?.profile_picture_url || undefined }}
-                      className="h-8 w-8 rounded-full bg-gray-200"
-                      contentFit="cover"
-                    />
-                    <View className="ml-2">
-                      <Text className="font-bold">{comment.user?.username}</Text>
-                      <Text className="text-xs text-gray-500">
-                        {format(new Date(comment.created_at), 'yyyy.MM.dd HH:mm')}
-                      </Text>
-                    </View>
-                  </View>
-                </View>
-                <Text className="mt-2 text-gray-700">{comment.content}</Text>
-              </View>
-            ))
-          ) : (
-            <View className="items-center justify-center py-8">
-              <Text className="text-gray-500">아직 댓글이 없습니다.</Text>
-              <Text className="mt-1 text-sm text-gray-400">첫 댓글을 작성해보세요!</Text>
-            </View>
-          )}
-        </View>
+        <ConsultationCommentSection
+          postId={consultation.post_id}
+          onEdit={(commentId, content) => {
+            setEditingCommentId(commentId);
+            setEditingCommentContent(content);
+          }}
+        />
+
+        {/* 댓글 작성 */}
+        {isTeacher && (
+          <View className="border-t border-gray-200 p-4">
+            <TextInput
+              className="rounded-lg border border-gray-300 p-2"
+              placeholder="답변을 입력하세요"
+              value={newComment}
+              onChangeText={setNewComment}
+            />
+            <TouchableOpacity
+              onPress={handleCommentSubmit}
+              className="mt-2 rounded bg-purple-500 p-2">
+              <Text className="text-center text-white">답변 작성</Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </ScrollView>
+
+      {/* 댓글 수정 모달 */}
+      <EditCommentModal
+        visible={editingCommentId !== null}
+        onClose={() => setEditingCommentId(null)}
+        onSubmit={handleEditSubmit}
+        initialContent={editingCommentContent}
+      />
     </>
   );
 }
