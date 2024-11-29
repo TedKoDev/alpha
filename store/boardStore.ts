@@ -2,16 +2,16 @@ import { create } from 'zustand';
 
 interface BoardState {
   cachedPosts: {
-    bella: any[];
+    Bera: any[];
     notice: any[];
     hot: any[];
   };
-  setCachedPosts: (type: 'bella' | 'notice' | 'hot', posts: any[]) => void;
+  setCachedPosts: (type: 'Bera' | 'notice' | 'hot', posts: any[]) => void;
 }
 
 export const useBoardStore = create<BoardState>((set) => ({
   cachedPosts: {
-    bella: [],
+    Bera: [],
     notice: [],
     hot: [],
   },

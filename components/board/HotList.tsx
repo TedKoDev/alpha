@@ -12,6 +12,8 @@ export default function HotList() {
     page: 1,
     limit: 5,
     sort: 'popular',
+    topicId: undefined,
+    categoryId: undefined,
   });
 
   const { cachedPosts, setCachedPosts } = useBoardStore();
@@ -24,7 +26,7 @@ export default function HotList() {
   }, [posts]);
 
   return (
-    <View className="pt-5">
+    <View className="mb-6 pt-5">
       <View className="mb-4 flex-row items-center justify-between px-4">
         <View className="flex-row items-center">
           <Text className="text-xl font-bold">Hot Posts</Text>
@@ -38,9 +40,14 @@ export default function HotList() {
       </View>
 
       <View>
-        {postItems.map((event) => (
-          <EventSmallListItem key={event.post_id} event={event} />
-        ))}
+        {[...Array(5)].map((_, index) => {
+          const event = postItems[index];
+          return event ? (
+            <EventSmallListItem key={event.post_id} event={event} />
+          ) : (
+            <View key={index} className="h-[72px] animate-pulse bg-white" />
+          );
+        })}
       </View>
     </View>
   );

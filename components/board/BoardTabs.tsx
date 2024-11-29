@@ -9,18 +9,18 @@ import BelaPick from './belapick';
 import { useBoardStore } from '~/store/boardStore';
 
 const tabs = [
-  { id: 'bella', title: "Bella's Pick", component: BelaPick },
+  { id: 'Bera', title: "Bera's Pick", component: BelaPick },
   { id: 'notice', title: 'Notice', component: Notice },
   { id: 'hot', title: 'Hot Posts', component: HotList },
 ];
 
 export default function BoardTabs() {
-  const [activeTab, setActiveTab] = useState('bella');
+  const [activeTab, setActiveTab] = useState('Bera');
   const { cachedPosts } = useBoardStore();
 
   // 모든 탭의 이미지를 미리 로드
   useEffect(() => {
-    const allPosts = [...cachedPosts.bella, ...cachedPosts.notice, ...cachedPosts.hot];
+    const allPosts = [...cachedPosts.Bera, ...cachedPosts.notice, ...cachedPosts.hot];
 
     const imageUrls = allPosts.reduce((acc: string[], item) => {
       if (item.media?.length) {

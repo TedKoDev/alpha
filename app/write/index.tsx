@@ -38,7 +38,7 @@ export default function WriteScreen() {
 
   // 토픽 목록 가져오기
   const { data: topics = [] } = useTopics();
-  //console.log('topics', JSON.stringify(topics, null, 2));
+  console.log('topics', JSON.stringify(topics, null, 2));
 
   // 선택된 토픽의 카테고리 찾기
   const selectedTopicCategories =

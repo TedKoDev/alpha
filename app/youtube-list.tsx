@@ -34,12 +34,28 @@ export default function YoutubeList() {
     <ScrollView className="bg-white">
       <Stack.Screen
         options={{
-          headerTitle: 'YouTube 📸',
+          headerTitle: () => (
+            <View className="flex-row items-center">
+              <Image
+                source={require('~/assets/images/youtube.png')}
+                className="mr-2 h-6 w-6"
+                resizeMode="contain"
+              />
+              <Text>YouTube</Text>
+            </View>
+          ),
+          headerRight: () => (
+            <Pressable
+              onPress={() => handleSubscribe('UCnV92PH-m2oxVD-jXIggNkQ')}
+              className="mr-4 rounded-full bg-red-600 px-4 py-1.5">
+              <Text className="text-sm font-medium text-white">Subscribe</Text>
+            </Pressable>
+          ),
         }}
       />
       <View className="p-4">
         {youtubeItems.map((item) => (
-          <View key={item.id} className="mb-6">
+          <View key={item.id} className="mb-6 border-b border-gray-200 pb-4">
             <Pressable onPress={() => setSelectedVideo(item.videoId)}>
               <Image
                 source={{ uri: `https://img.youtube.com/vi/${item.videoId}/hqdefault.jpg` }}

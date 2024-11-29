@@ -13,6 +13,8 @@ export default function Notice() {
     limit: 5,
     sort: 'latest',
     type: 'COLUMN',
+    topicId: undefined,
+    categoryId: undefined,
   });
 
   const { cachedPosts, setCachedPosts } = useBoardStore();
@@ -40,9 +42,14 @@ export default function Notice() {
       </View>
 
       <View>
-        {postItems.map((event: any) => (
-          <EventSmallListItem key={event.post_id} event={event} />
-        ))}
+        {[...Array(5)].map((_, index) => {
+          const event = postItems[index];
+          return event ? (
+            <EventSmallListItem key={event.post_id} event={event} />
+          ) : (
+            <View key={index} className="h-[72px] animate-pulse bg-white" />
+          );
+        })}
       </View>
     </View>
   );

@@ -32,11 +32,11 @@ export const useYoutubeLinks = () => {
 
       return uniqueLinks.map((link, index): YoutubeItem => {
         const videoId = getYoutubeVideoId(link);
-        console.log('VideoId', videoId);
+        // console.log('VideoId', videoId);
         return {
           id: `${videoId}-${index}`,
           videoId,
-          title: '카페 브이로그',
+          title: data[index].name,
           channel: CHANNEL_INFO.name,
           channelId: CHANNEL_INFO.id,
           thumbnail: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,

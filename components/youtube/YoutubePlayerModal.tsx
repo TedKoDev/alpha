@@ -1,5 +1,4 @@
 import { Ionicons } from '@expo/vector-icons';
-import * as Linking from 'expo-linking';
 import React, { useState, useCallback, useEffect } from 'react';
 import { View, Text, Modal, Pressable, ActivityIndicator, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -53,7 +52,7 @@ export default function YoutubePlayerModal({ videoId, onClose }: Props) {
         console.log('Retrying player initialization...');
         setKey(Date.now());
       }
-    }, 3000);
+    }, 1500);
   }, [playerReady]);
 
   return (
@@ -69,7 +68,7 @@ export default function YoutubePlayerModal({ videoId, onClose }: Props) {
           </Pressable>
 
           <Pressable
-            onPress={() => videoId && handleExternalOpen(videoId)}
+            onPress={() => videoId}
             hitSlop={{ top: 35, bottom: 35, left: 15, right: 15 }}
             className="rounded-full bg-black/50 p-2">
             <Ionicons name="open-outline" size={24} color="white" />
@@ -94,7 +93,6 @@ export default function YoutubePlayerModal({ videoId, onClose }: Props) {
                   modestbranding: true,
                   rel: false,
                   controls: true,
-                  autoplay: 1,
                 }}
                 webViewProps={{
                   androidLayerType: Platform.select({
@@ -142,9 +140,7 @@ export default function YoutubePlayerModal({ videoId, onClose }: Props) {
                   className="mb-4 rounded-full bg-white px-6 py-2">
                   <Text className="font-medium">다시 시도</Text>
                 </Pressable>
-                <Pressable
-                  onPress={() => videoId && handleExternalOpen(videoId)}
-                  className="rounded-full bg-red-500 px-6 py-2">
+                <Pressable onPress={() => videoId} className="rounded-full bg-red-500 px-6 py-2">
                   <Text className="font-medium text-white">브라우저에서 열기</Text>
                 </Pressable>
               </View>

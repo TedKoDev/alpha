@@ -1,9 +1,10 @@
 import { Link } from 'expo-router';
 import React, { useEffect } from 'react';
-import { View, Text, Image, TouchableOpacity, FlatList } from 'react-native';
-import { usePosts } from '~/queries/hooks/posts/usePosts';
-import EventListItem from '../EventListingItem';
+import { View, Text, TouchableOpacity } from 'react-native';
+
 import EventSmallListItem from '../EventsmallListingItem';
+
+import { usePosts } from '~/queries/hooks/posts/usePosts';
 import { useBoardStore } from '~/store/boardStore';
 
 interface Post {
@@ -20,14 +21,16 @@ export default function BelaPick() {
     limit: 5,
     sort: 'latest',
     admin_pick: true,
+    topicId: undefined,
+    categoryId: undefined,
   });
 
   const { cachedPosts, setCachedPosts } = useBoardStore();
-  const postItems = cachedPosts.bella.length > 0 ? cachedPosts.bella : posts?.pages[0]?.data || [];
+  const postItems = cachedPosts.Bera.length > 0 ? cachedPosts.Bera : posts?.pages[0]?.data || [];
 
   useEffect(() => {
     if (posts?.pages[0]?.data) {
-      setCachedPosts('bella', posts.pages[0].data);
+      setCachedPosts('Bera', posts.pages[0].data);
     }
   }, [posts]);
 
@@ -36,10 +39,10 @@ export default function BelaPick() {
       {/* Header */}
       <View className="mb-4 flex-row items-center justify-between px-4">
         <View className="flex-row items-center">
-          <Text className="text-xl font-bold">Bella's Pick</Text>
+          <Text className="text-xl font-bold">Bera's Pick</Text>
           <Text className="ml-2 text-xl text-[#B227D4]">✓</Text>
         </View>
-        <Link href="/board/bella-picks" asChild>
+        <Link href="/board/Bera-picks" asChild>
           <TouchableOpacity>
             <Text className="text-sm text-[#FF6B6B]">See all</Text>
           </TouchableOpacity>
@@ -48,9 +51,13 @@ export default function BelaPick() {
 
       {/* Posts List */}
       <View>
-        {postItems.map((event) => (
-          <EventSmallListItem key={event.post_id} event={event} />
-        ))}
+        {[...Array(5)].map((_, index) => {
+          const event = postItems[index];
+          if (event) {
+            return <EventSmallListItem key={`event-${event.post_id}`} event={event} />;
+          }
+          return <View key={`skeleton-${index}`} className="h-[72px] animate-pulse bg-white" />;
+        })}
       </View>
     </View>
   );

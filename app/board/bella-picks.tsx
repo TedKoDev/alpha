@@ -5,7 +5,7 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import ListLayout from '~/components/layouts/ListLayout';
 import { usePosts } from '~/queries/hooks/posts/usePosts';
 
-export default function BellaPicksScreen() {
+export default function BeraPicksScreen() {
   const [sort, setSort] = useState<'latest' | 'oldest' | 'popular'>('latest');
 
   const {
@@ -42,7 +42,7 @@ export default function BellaPicksScreen() {
     <View className="flex-1 bg-white">
       <Stack.Screen
         options={{
-          headerTitle: "Bella's Pick",
+          headerTitle: "Bera's Pick",
           headerTitleAlign: 'center',
           headerTintColor: '#D812DC',
         }}

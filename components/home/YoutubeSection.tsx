@@ -7,7 +7,7 @@ import { useYoutubeLinks } from '~/queries/hooks/youtube/useYoutubeLinks';
 
 export default function YoutubeSection() {
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
-  console.log('selectedViedeo', selectedVideo);
+  // console.log('selectedViedeo', selectedVideo);
   const { data: youtubeItems, isLoading: youtubeLinkLoading, error } = useYoutubeLinks();
 
   const handleVideoPress = useCallback((videoId: string) => {
@@ -57,13 +57,14 @@ export default function YoutubeSection() {
           <View key={item.id} className="mr-3" style={{ width: 280 }}>
             <Pressable onPress={() => handleVideoPress(item.videoId)}>
               <Image
-                source={{ uri: `https://img.youtube.com/vi/${item.videoId}/hqdefault.jpg` }}
+                source={{ uri: item.thumbnail }}
                 className="mb-2 rounded-lg"
                 style={{ width: '100%', height: 200 }}
               />
               <Text className="font-medium" numberOfLines={2}>
                 {item.title}
               </Text>
+              {item.topic && <Text className="text-sm text-gray-600">{item.topic}</Text>}
               <Text className="text-gray-500">{item.channel}</Text>
             </Pressable>
           </View>
