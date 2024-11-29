@@ -157,6 +157,21 @@ export default function WriteScreen() {
           onPress: () => router.push('/write/with-words'),
         },
       ]);
+    } else if (type === 'CONSULTATION') {
+      Alert.alert(
+        '1:1 상담 글쓰기',
+        '선생님과의 1:1 상담은 포인트가 차감됩니다. 계속하시겠습니까?',
+        [
+          {
+            text: '취소',
+            style: 'cancel',
+          },
+          {
+            text: '확인',
+            onPress: () => router.push('/write/writeforconsultation'),
+          },
+        ]
+      );
     } else {
       setSelectedType(type);
     }

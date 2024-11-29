@@ -27,11 +27,11 @@ interface Post {
 type UsePostsParams = {
   page: number;
   limit: number;
-  sort: string;
+  sort: 'latest' | 'oldest' | 'popular';
   type?: string;
   admin_pick?: boolean;
-  topicId: number | undefined;
-  categoryId: number | undefined;
+  topicId?: number;
+  categoryId?: number;
 };
 
 export function usePosts(params: UsePostsParams) {
@@ -39,11 +39,13 @@ export function usePosts(params: UsePostsParams) {
     queryKey: ['posts', params],
     queryFn: ({ pageParam = 1 }) =>
       getPostApi({
-        ...params,
         page: pageParam,
-        sort: params.sort as 'latest' | 'oldest' | 'popular',
-        type: params.type as 'SENTENCE' | 'COLUMN' | 'QUESTION' | 'GENERAL',
+        limit: params.limit,
+        sort: params.sort,
+        type: params.type,
         admin_pick: params.admin_pick,
+        topic_id: params.topicId,
+        category_id: params.categoryId,
       }),
     getNextPageParam: (lastPage, allPages) => {
       const nextPage = allPages.length + 1;

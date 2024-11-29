@@ -29,6 +29,8 @@ interface ListLayoutProps {
   ListHeaderComponent?: React.ReactElement;
   ListEmptyComponent?: React.ReactElement;
   contentContainerStyle?: StyleProp<ViewStyle>;
+  renderItem?: ({ item }: { item: any }) => React.ReactElement;
+  defaultViewMode?: 'list' | 'instagram';
 }
 
 export default function ListLayout({
@@ -47,9 +49,11 @@ export default function ListLayout({
   ListHeaderComponent,
   ListEmptyComponent,
   contentContainerStyle,
+  renderItem,
+  defaultViewMode = 'list',
 }: ListLayoutProps) {
   const router = useRouter();
-  const [viewMode, setViewMode] = useState<'list' | 'instagram'>('list');
+  const [viewMode, setViewMode] = useState<'list' | 'instagram'>(defaultViewMode);
 
   // console.log('data', JSON.stringify(data, null, 2));
 
@@ -156,7 +160,9 @@ export default function ListLayout({
         data={data}
         key={viewMode}
         renderItem={({ item }) =>
-          viewMode === 'list' ? (
+          renderItem ? (
+            renderItem({ item })
+          ) : viewMode === 'list' ? (
             <EventListingItem event={item} />
           ) : (
             <InstagramStyleItem event={item} />

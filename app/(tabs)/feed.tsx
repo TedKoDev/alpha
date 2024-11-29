@@ -52,6 +52,10 @@ export default function Feed() {
     }
   }, [selectedTopic]);
 
+  useEffect(() => {
+    refetch();
+  }, [selectedTopicId, selectedCategoryId, sortBy]);
+
   return (
     <View className="flex-1 bg-white">
       <ListLayout

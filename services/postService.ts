@@ -2,7 +2,7 @@ import { api } from './api';
 import { useAuthStore } from '../store/authStore';
 
 // 타입 정의
-export type PostType = 'SENTENCE' | 'GENERAL' | 'COLUMN' | 'QUESTION';
+export type PostType = 'SENTENCE' | 'GENERAL' | 'COLUMN' | 'QUESTION' | 'CONSULTATION';
 
 export interface CreateMediaDto {
   mediaUrl: string;
@@ -14,6 +14,8 @@ export interface CreatePostDto {
   title?: string;
   content?: string;
   points?: number;
+  basePrice?: number;
+  isPrivate?: boolean;
   type: PostType;
   media?: CreateMediaDto[];
   tags?: string[];
@@ -55,16 +57,22 @@ export const getPostApi = async ({
 }: GetPostsParams) => {
   try {
     const token = useAuthStore.getState().userToken;
+
+    const params = {
+      page,
+      limit,
+      sort,
+      type,
+      admin_pick,
+      topic_id,
+      category_id,
+    };
+
+    // undefined 값 제거
+    Object.keys(params).forEach((key) => params[key] === undefined && delete params[key]);
+
     const response = await api.get('/posts', {
-      params: {
-        page,
-        limit,
-        sort,
-        type,
-        admin_pick,
-        topic_id,
-        category_id,
-      },
+      params,
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -262,3 +270,30 @@ export class PostService {
 }
 
 export const postService = new PostService();
+
+export const getConsultationsApi = async ({ page, limit }: { page: number; limit: number }) => {
+  try {
+    const token = useAuthStore.getState().userToken;
+    const response = await api.get('/posts/consultations', {
+      params: { page, limit },
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Get consultations failed', error);
+    throw error;
+  }
+};
+
+export const getConsultationByIdApi = async (id: number) => {
+  try {
+    const token = useAuthStore.getState().userToken;
+    const response = await api.get(`/posts/consultations/${id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Get consultation failed', error);
+    throw error;
+  }
+};

@@ -1,6 +1,6 @@
 import { FontAwesome5 } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import { Stack } from 'expo-router';
+import { router, Stack } from 'expo-router';
 import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
@@ -223,6 +223,12 @@ export default function MyPage() {
 
           {/* Learning Section */}
           <View style={styles.tradeSection}>
+            <TouchableOpacity
+              style={styles.tradeItem}
+              onPress={() => router.push('/consultations')}>
+              <FontAwesome5 name="comments" size={24} color="black" />
+              <Text style={styles.tradeLabel}>상담 내역</Text>
+            </TouchableOpacity>
             <TouchableOpacity style={styles.tradeItem}>
               <FontAwesome5 name="book" size={24} color="black" />
               <Text style={styles.tradeLabel}>My Courses</Text>
@@ -230,10 +236,6 @@ export default function MyPage() {
             <TouchableOpacity style={styles.tradeItem}>
               <FontAwesome5 name="history" size={24} color="black" />
               <Text style={styles.tradeLabel}>Learning History</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.tradeItem}>
-              <FontAwesome5 name="comments" size={24} color="black" />
-              <Text style={styles.tradeLabel}>Messages</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.tradeItem}>
               <FontAwesome5 name="bookmark" size={24} color="black" />
