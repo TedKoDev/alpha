@@ -1,18 +1,29 @@
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { getConsultationsApi, getConsultationByIdApi } from '~/services/postService';
 import { useAuthStore } from '~/store/authStore';
+import { ConsultationFilters } from '~/types/consultation';
 
-export function useConsultations(params: { page: number; limit: number }) {
+export function useConsultations({
+  page = 1,
+  limit = 10,
+  ...filters
+}: {
+  page: number;
+  limit: number;
+} & ConsultationFilters) {
   return useInfiniteQuery({
-    queryKey: ['consultations', params],
-    queryFn: ({ pageParam = 1 }) =>
-      getConsultationsApi({
+    queryKey: ['consultations', filters],
+    queryFn: ({ pageParam = 1 }) => {
+      console.log('Sending filters to API:', filters);
+      return getConsultationsApi({
         page: pageParam,
-        limit: params.limit,
-      }),
+        limit,
+        ...filters,
+      });
+    },
     getNextPageParam: (lastPage, allPages) => {
       const nextPage = allPages.length + 1;
-      return lastPage.data.length === params.limit ? nextPage : undefined;
+      return lastPage.data.length === limit ? nextPage : undefined;
     },
     initialPageParam: 1,
   });

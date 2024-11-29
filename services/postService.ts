@@ -1,5 +1,6 @@
 import { api } from './api';
 import { useAuthStore } from '../store/authStore';
+import { ConsultationStatus } from '~/types/consultation';
 
 // 타입 정의
 export type PostType = 'SENTENCE' | 'GENERAL' | 'COLUMN' | 'QUESTION' | 'CONSULTATION';
@@ -271,11 +272,34 @@ export class PostService {
 
 export const postService = new PostService();
 
-export const getConsultationsApi = async ({ page, limit }: { page: number; limit: number }) => {
+export const getConsultationsApi = async ({
+  page,
+  limit,
+  status,
+  sort = 'latest',
+  teacher_id,
+  category_id,
+  topic_id,
+}: {
+  page: number;
+  limit: number;
+  status?: ConsultationStatus;
+  sort?: 'latest' | 'oldest';
+  teacher_id?: number;
+  category_id?: number;
+  topic_id?: number;
+}) => {
   try {
     const token = useAuthStore.getState().userToken;
+    const params = { page, limit, status, sort, teacher_id, category_id, topic_id };
+
+    // undefined 값 제거
+    Object.keys(params).forEach((key) => params[key] === undefined && delete params[key]);
+
+    console.log('params', params);
+
     const response = await api.get('/posts/consultations', {
-      params: { page, limit },
+      params,
       headers: { Authorization: `Bearer ${token}` },
     });
     return response.data;

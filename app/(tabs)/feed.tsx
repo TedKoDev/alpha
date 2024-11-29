@@ -17,6 +17,8 @@ export default function Feed() {
 
   const { data: topicsData } = useTopics();
 
+  console.log('topicsData', JSON.stringify(topicsData, null, 2));
+
   const {
     data: postsData,
     fetchNextPage,

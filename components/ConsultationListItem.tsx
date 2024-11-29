@@ -8,10 +8,12 @@ import { ConsultationStatus, getStatusText, getStatusColor } from '~/types/consu
 export default function ConsultationListItem({ consultation }: any) {
   const { post_content: content } = consultation;
 
-  console.log('vvv', content);
+  // console.log('vvv', content);
+
+  // console.log('Consultation Status:', content.status);
 
   return (
-    <Link href={`/consultation/${consultation.post_id}`} asChild>
+    <Link href={`/consultations/${consultation.post_id}`} asChild>
       <Pressable className="border-b border-gray-200 bg-white p-4">
         {/* 상단: 사용자 정보 & 시간 */}
         <View className="mb-3 flex-row items-center justify-between">

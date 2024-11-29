@@ -34,3 +34,12 @@ export const getStatusColor = (status: ConsultationStatus) => {
       return 'bg-gray-100 text-gray-600';
   }
 };
+
+// 필터 옵션 타입 정의
+export interface ConsultationFilters {
+  status?: ConsultationStatus;
+  sort?: 'latest' | 'oldest';
+  teacher_id?: number;
+  category_id?: number;
+  topic_id?: number;
+}
