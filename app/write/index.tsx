@@ -48,10 +48,10 @@ export default function WriteScreen() {
 
   const postTypes: { type: PostType; label: string }[] = [
     { type: 'GENERAL', label: 'General' },
-    { type: 'SENTENCE', label: 'Today Words' },
-    { type: 'COLUMN', label: 'Column' },
+    // { type: 'COLUMN', label: 'Column' },
     { type: 'QUESTION', label: 'Question' },
     { type: 'CONSULTATION', label: 'Consultation' },
+    { type: 'SENTENCE', label: 'Today Words' },
   ];
 
   const pickImages = async () => {
@@ -68,7 +68,7 @@ export default function WriteScreen() {
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsMultipleSelection: true,
         quality: 1,
-        selectionLimit: remainingSlots, // 남은 슬롯만큼만 선택 가능
+        selectionLimit: remainingSlots,
       });
 
       if (!result.canceled) {
@@ -99,7 +99,7 @@ export default function WriteScreen() {
 
       setIsImageLoading(true);
 
-      // 이미지 업로드 처리
+      // Handle image upload
       const uploadedUrls = await Promise.all(
         selectedImages.map(async (image) => {
           const extension = image.uri.split('.').pop();
@@ -159,15 +159,15 @@ export default function WriteScreen() {
       ]);
     } else if (type === 'CONSULTATION') {
       Alert.alert(
-        '1:1 상담 글쓰기',
-        '선생님과의 1:1 상담은 포인트가 차감됩니다. 계속하시겠습니까?',
+        '1:1 Consultation ',
+        '1:1 Consultation will deduct points. Would you like to continue?',
         [
           {
-            text: '취소',
+            text: 'cancel',
             style: 'cancel',
           },
           {
-            text: '확인',
+            text: 'OK',
             onPress: () => router.push('/write/writeforconsultation'),
           },
         ]
@@ -242,28 +242,30 @@ export default function WriteScreen() {
           <Text className="mb-2 text-gray-600">Topic</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <View className="flex-row gap-2">
-              {topics.map((topic) => (
-                <TouchableOpacity
-                  key={topic.topic_id}
-                  onPress={() => {
-                    setSelectedTopic(topic.topic_id);
-                    setSelectedCategory(null);
-                  }}
-                  className={`rounded-full px-4 py-2 ${
-                    selectedTopic === topic.topic_id ? 'bg-purple-500' : 'bg-gray-200'
-                  }`}>
-                  <Text
-                    className={selectedTopic === topic.topic_id ? 'text-white' : 'text-gray-700'}>
-                    {topic.title}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+              {topics
+                .filter((topic) => topic.topic_id !== 1)
+                .map((topic) => (
+                  <TouchableOpacity
+                    key={topic.topic_id}
+                    onPress={() => {
+                      setSelectedTopic(topic.topic_id);
+                      setSelectedCategory(null);
+                    }}
+                    className={`rounded-full px-4 py-2 ${
+                      selectedTopic === topic.topic_id ? 'bg-purple-500' : 'bg-gray-200'
+                    }`}>
+                    <Text
+                      className={selectedTopic === topic.topic_id ? 'text-white' : 'text-gray-700'}>
+                      {topic.title}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
             </View>
           </ScrollView>
         </View>
 
         {/* Category Selection with horizontal scroll */}
-        {selectedTopic && (
+        {selectedTopic && selectedTopic !== 1 && (
           <View className="mb-4">
             <Text className="mb-2 text-gray-600">Category</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>

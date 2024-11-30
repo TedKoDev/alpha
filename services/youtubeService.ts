@@ -16,7 +16,7 @@ export const youtubeService = {
           Authorization: `Bearer ${token}`,
         },
       });
-      console.log('response   ', response.data);
+      // console.log('response   ', response.data);
       return response.data;
     } catch (error) {
       console.error('Get youtube links failed', error);

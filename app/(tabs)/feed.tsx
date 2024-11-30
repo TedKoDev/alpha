@@ -12,12 +12,11 @@ export default function Feed() {
   const [selectedTopicId, setSelectedTopicId] = useState<number | undefined>();
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | undefined>();
   const [showSortModal, setShowSortModal] = useState(false);
+  const [showQuestionsOnly, setShowQuestionsOnly] = useState(false);
 
   const [dropdownPosition, setDropdownPosition] = useState(200);
 
   const { data: topicsData } = useTopics();
-
-  console.log('topicsData', JSON.stringify(topicsData, null, 2));
 
   const {
     data: postsData,
@@ -32,16 +31,16 @@ export default function Feed() {
     sort: sortBy,
     topicId: selectedTopicId,
     categoryId: selectedCategoryId,
+    type: showQuestionsOnly ? 'QUESTION' : undefined,
   });
 
   const allPosts = postsData?.pages?.flatMap((page) => page.data) ?? [];
-
   const selectedTopic = topicsData?.find((topic) => topic.topic_id === selectedTopicId);
 
   const sortOptions = [
-    { value: 'latest', label: '최신순' },
-    { value: 'oldest', label: '오래된순' },
-    { value: 'popular', label: '인기순' },
+    { value: 'latest', label: 'Latest' },
+    { value: 'oldest', label: 'Oldest' },
+    { value: 'popular', label: 'Popular' },
   ] as const;
 
   const selectedSortLabel = sortOptions.find((option) => option.value === sortBy)?.label;
@@ -56,7 +55,7 @@ export default function Feed() {
 
   useEffect(() => {
     refetch();
-  }, [selectedTopicId, selectedCategoryId, sortBy]);
+  }, [selectedTopicId, selectedCategoryId, sortBy, showQuestionsOnly]);
 
   return (
     <View className="flex-1 bg-white">
@@ -85,6 +84,8 @@ export default function Feed() {
             setSelectedTopicId={setSelectedTopicId}
             setSelectedCategoryId={setSelectedCategoryId}
             setShowSortModal={setShowSortModal}
+            showQuestionsOnly={showQuestionsOnly}
+            setShowQuestionsOnly={setShowQuestionsOnly}
           />
         }
         ListEmptyComponent={
@@ -97,7 +98,6 @@ export default function Feed() {
         }}
       />
 
-      {/* Dropdown Menu - 최상위 레벨에 렌더링 */}
       {showSortModal && (
         <View
           style={{

@@ -32,14 +32,30 @@ interface CommentItemProps {
     user_liked: boolean;
     likes: number;
     user_id: number;
+    isSelected: boolean;
   };
-  onToggleLike: (commentId: number) => void; // 댓글 좋아요 토글 함수
-  onDelete: (commentId: number) => void; // 댓글 삭제 함수
-  onEdit: (commentId: number, newContent: string) => void; // 댓글 수정 함수
+  post_type?: string;
+  isQuestionAuthor: boolean;
+  onToggleLike: (commentId: number) => void;
+  onDelete: (commentId: number) => void;
+  onEdit: (commentId: number, newContent: string) => void;
+  onSelectAnswer?: (commentId: number) => void;
+  sortedComments?: any[];
 }
 
-export default function CommentItem({ comment, onToggleLike, onDelete, onEdit }: CommentItemProps) {
-  console.log('comment ', comment);
+export default function CommentItem({
+  comment,
+  onToggleLike,
+  onDelete,
+  onEdit,
+  onSelectAnswer,
+  post_type,
+  isQuestionAuthor,
+  sortedComments,
+}: CommentItemProps) {
+  console.log('isQuestionAuthorestionAuthor', isQuestionAuthor);
+  console.log('comment.user_id', comment.user_id);
+
   const [modalVisible, setModalVisible] = useState(false);
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
   const slideAnim = React.useRef(new Animated.Value(100)).current;
@@ -154,27 +170,34 @@ export default function CommentItem({ comment, onToggleLike, onDelete, onEdit }:
             <View className="flex-row items-center justify-between">
               <View className="flex-row items-center">
                 <Text className="font-bold">{comment.user?.username}</Text>
-                {/* 유저 지역 표시 */}
                 <Text className="ml-2 text-xs text-gray-500">
                   {comment.user?.country?.flag_icon}
                 </Text>
                 <Text className="ml-1 text-xs text-red-500">Lv {comment.user?.level}</Text>
-
                 <Text className="ml-2 text-xs text-gray-500">
                   {dayjs(comment.created_at).fromNow()}
+                  {comment.content}
                 </Text>
+                <Text>{comment.comment_id}</Text>
               </View>
-              <View className="flex-row items-center">
-                <Pressable onPress={() => onToggleLike(comment.comment_id)}>
+
+              <View className="mt-2 flex-row items-center space-x-4">
+                <TouchableOpacity
+                  onPress={() => onToggleLike(comment.comment_id)}
+                  className="flex-row items-center"
+                  style={{ zIndex: 10, pointerEvents: 'auto' }}>
                   <FontAwesome
                     name={comment.user_liked ? 'heart' : 'heart-o'}
-                    size={16}
-                    color={comment.user_liked ? 'red' : '#666666'}
+                    size={20}
+                    color={comment.user_liked ? '#FF0000' : '#666666'}
                   />
-                </Pressable>
-                <Pressable onPress={handleOpenMenu} style={{ marginLeft: 10 }}>
+                  <Text className="ml-1 text-gray-600">{comment.likes}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={handleOpenMenu}
+                  style={{ zIndex: 10, pointerEvents: 'auto' }}>
                   <Feather name="more-horizontal" size={20} color="#666666" />
-                </Pressable>
+                </TouchableOpacity>
               </View>
             </View>
             {isEditing ? (
@@ -211,6 +234,22 @@ export default function CommentItem({ comment, onToggleLike, onDelete, onEdit }:
               </View>
             ) : (
               <Text className="mt-1 text-gray-800">{comment.content}</Text>
+            )}
+            {post_type === 'QUESTION' &&
+              isQuestionAuthor &&
+              !comment.isSelected &&
+              comment.user_id !== currentUser?.user_id &&
+              !sortedComments?.some((c) => c.isSelected) && (
+                <TouchableOpacity
+                  onPress={() => onSelectAnswer?.(comment.comment_id)}
+                  className="mt-2 self-end rounded-lg bg-purple-500 px-3 py-1">
+                  <Text className="text-white">답변 채택하기</Text>
+                </TouchableOpacity>
+              )}
+            {comment.isSelected && (
+              <View className="mt-2 self-end rounded-lg bg-green-100 px-3 py-1">
+                <Text className="text-green-600">채택된 답변</Text>
+              </View>
             )}
           </View>
         </View>

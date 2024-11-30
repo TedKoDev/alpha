@@ -13,12 +13,15 @@ export default function InstagramStyleItem({ event }: any) {
     <Link href={`/event/${event.post_id}`} asChild>
       <Pressable className="bg-white">
         <View className="flex-row items-center p-3">
-          <Image
-            source={{ uri: event.user_profile_picture_url || 'https://via.placeholder.com/32' }}
-            style={{ width: 32, height: 32, borderRadius: 16 }}
-            contentFit="cover"
-            transition={200}
-          />
+          <View className="flex-row items-center">
+            {event.type === 'QUESTION' && <Text className="mr-2 text-lg text-purple-500">Q.</Text>}
+            <Image
+              source={{ uri: event.user_profile_picture_url || 'https://via.placeholder.com/32' }}
+              style={{ width: 32, height: 32, borderRadius: 16 }}
+              contentFit="cover"
+              transition={200}
+            />
+          </View>
           <View className="ml-3 flex-1">
             <View className="flex-row items-center justify-between">
               <View className="flex-row items-center">
@@ -61,7 +64,12 @@ export default function InstagramStyleItem({ event }: any) {
         </View>
 
         <View className="mt-2 flex-row items-center justify-between p-3">
-          <Text className="text-xs text-purple-500">{event.category_name}</Text>
+          <View className="flex-row items-center gap-2">
+            <Text className="text-xs text-purple-500">{event.category_name}</Text>
+            {event.type === 'QUESTION' && event.post_content.points && (
+              <Text className="text-xs text-orange-500">{event.post_content.points}P</Text>
+            )}
+          </View>
 
           <View className="flex-row items-center">
             <View className="flex-row items-center">
@@ -74,9 +82,9 @@ export default function InstagramStyleItem({ event }: any) {
             </View>
             <View className="ml-4 flex-row items-center">
               <FontAwesome
-                name={event.user_liked ? 'heart' : 'heart-o'} // 좋아요 상태에 따라 아이콘 변경
+                name={event.user_liked ? 'heart' : 'heart-o'}
                 size={20}
-                color={event.user_liked ? 'red' : 'gray'} // 좋아요 상태에 따라 색상 변경
+                color={event.user_liked ? 'red' : 'gray'}
               />
               <Text className="ml-2 text-sm text-gray-600">{event.likes}</Text>
             </View>

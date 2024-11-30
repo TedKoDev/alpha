@@ -1,6 +1,8 @@
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import axios from 'axios';
 
 import { commentService, PaginationQueryDto } from '~/services/commentService';
+import { likeService } from '~/services/likeService';
 
 export const useComments = (postId: number, sort: 'latest' | 'oldest' | 'popular' = 'latest') => {
   return useInfiniteQuery({
@@ -90,11 +92,12 @@ export const useToggleCommentLike = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: commentService.toggleCommentLike,
+    mutationFn: likeService.toggleCommentLike,
     onSuccess: async (_, commentId) => {
       // 댓글이 속한 게시물의 ID를 알아야 정확한 쿼리 무효화가 가능합니다
       // 현재 캐시된 데이터에서 해당 댓글의 게시물 ID를 찾습니다
       const queries = queryClient.getQueriesData<any>({ queryKey: ['comments'] });
+      console.log('queries', queries);
 
       for (const [queryKey] of queries) {
         const [_, postId] = queryKey;
@@ -140,6 +143,20 @@ export const useToggleCommentLike = () => {
           });
         }
       }
+    },
+  });
+};
+
+export const useSelectAnswer = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (commentId: number) => {
+      const response = await axios.patch(`/api/comments/${commentId}/select-as-answer`);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['comments'] });
     },
   });
 };

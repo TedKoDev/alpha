@@ -1,5 +1,6 @@
 import { api } from './api';
 import { useAuthStore } from '../store/authStore';
+import axios from 'axios';
 
 export interface CreateCommentRequest {
   postId: number;
@@ -41,7 +42,7 @@ export const commentService = {
           },
         }
       );
-      console.log('Response:', response.data);
+      // console.log('Response:', response.data);
       return response.data;
     } catch (error) {
       console.error('Create comment failed:', error);
@@ -108,4 +109,31 @@ export const commentService = {
     );
     return response.data;
   },
+
+  selectAsAnswer: async (commentId: number) => {
+    try {
+      const response = await axios.patch(`/api/comments/${commentId}/select-as-answer`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+};
+
+export const answerConsultationApi = async (postId: number, content: string, commentId: number) => {
+  console.log('answerConsultationApi', postId, content, commentId);
+  try {
+    const token = useAuthStore.getState().userToken;
+    const response = await api.post(
+      `/comments/consultation/${postId}/answer`,
+      { content, commentId },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Answer consultation failed', error);
+    throw error;
+  }
 };

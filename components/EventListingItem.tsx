@@ -7,12 +7,13 @@ export default function EventListItem({ event }: any) {
   // 삭제되지 않은 미디어만 필터링
   const activeMedia = event.media?.filter((media: any) => media.deleted_at === null) || [];
 
-  console.log('event', JSON.stringify(event, null, 2));
+  // console.log('event', JSON.stringify(event, null, 2));
   return (
     <Link href={`/event/${event.post_id}`} asChild>
       <Pressable className="border-b border-gray-200 bg-white p-4">
         <View className="mb-2 flex-row items-center">
           <View className="flex-1 flex-row items-center">
+            {event.type === 'QUESTION' && <Text className="mr-2 text-lg text-purple-500">Q.</Text>}
             <Image
               source={{ uri: event.user_profile_picture_url || 'https://via.placeholder.com/32' }}
               style={{ width: 24, height: 24, borderRadius: 12 }}
@@ -58,7 +59,23 @@ export default function EventListItem({ event }: any) {
         </View>
 
         <View className="mt-3 flex-row items-center justify-between">
-          <Text className="text-xs text-purple-500">{event.category_name}</Text>
+          <View className="flex-row items-center gap-2">
+            <Text className="text-xs text-purple-500">{event.category_name}</Text>
+            {event.type === 'QUESTION' && (
+              <>
+                <Text className="text-xs text-gray-500">·</Text>
+                {event.post_content.points && (
+                  <Text className="text-xs text-orange-500">{event.post_content.points}P</Text>
+                )}
+                {event.post_content.is_answer && (
+                  <>
+                    <Text className="text-xs text-gray-500">·</Text>
+                    <Text className="text-xs text-green-500">답변완료</Text>
+                  </>
+                )}
+              </>
+            )}
+          </View>
 
           <View className="flex-row items-center">
             <View className="flex-row items-center">

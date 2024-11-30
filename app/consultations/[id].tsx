@@ -1,7 +1,6 @@
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { format } from 'date-fns';
 import { Image } from 'expo-image';
-
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
@@ -17,28 +16,32 @@ import {
 import ConsultationCommentSection from './components/ConsultationCommentSection';
 import EditCommentModal from '../event/[id]/components/EditCommentModal';
 
+import { useAnswerConsultation } from '~/queries/hooks/comments/useAnswerConsultation';
 import {
+  useComments,
   useCreateComment,
   useDeleteComment,
   useUpdateComment,
 } from '~/queries/hooks/comments/useComments';
 import { useConsultationById } from '~/queries/hooks/posts/useConsultations';
-import { commentService } from '~/services/commentService';
+import { queryClient } from '~/queries/queryClient';
+import { answerConsultationApi, commentService } from '~/services/commentService';
 import { useAuthStore } from '~/store/authStore';
-import { getStatusColor, getStatusText } from '~/types/consultation';
+import { ConsultationStatus, getStatusColor, getStatusText } from '~/types/consultation';
 
 export default function ConsultationDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { data: consultation, isLoading } = useConsultationById(Number(id));
 
-  console.log('consultation', consultation);
+  console.log('123consultation', JSON.stringify(consultation, null, 2));
 
   const { userInfo } = useAuthStore();
   console.log('userInfo', userInfo);
   const createCommentMutation = useCreateComment();
   const deleteCommentMutation = useDeleteComment();
   const updateCommentMutation = useUpdateComment();
+  const answerConsultationMutation = useAnswerConsultation();
 
   const [newComment, setNewComment] = useState('');
   const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
@@ -65,7 +68,7 @@ export default function ConsultationDetailScreen() {
 
   const handleCommentSubmit = async (comment_id: any, content: any) => {
     if (!newComment.trim()) {
-      Alert.alert('알림', '댓글을 입력해주세요.');
+      Alert.alert('알림', '글을 입해주세요.');
       return;
     }
     try {
@@ -114,7 +117,7 @@ export default function ConsultationDetailScreen() {
   };
 
   const handlePostDelete = () => {
-    Alert.alert('게시글 삭제', '정말 삭제하시겠습니까?', [
+    Alert.alert('게시글 제', '정말 삭제하시겠습니까?', [
       { text: '취소', style: 'cancel' },
       {
         text: '삭제',
@@ -129,6 +132,44 @@ export default function ConsultationDetailScreen() {
         },
       },
     ]);
+  };
+
+  const handleConfirmAnswer = async (commentId: number) => {
+    Alert.alert(
+      '답변 확정',
+      '이 답변을 확정하시겠습니까?\n확정 후에는 수정이 불가능하며, 상담 포인트가 지급됩니다.',
+      [
+        { text: '취소', style: 'cancel' },
+        {
+          text: '확정',
+          style: 'default',
+          onPress: async () => {
+            try {
+              const { data } = await commentService.getComments({
+                postId: consultation.post_id,
+                sort: 'latest',
+              });
+              const comment = data.find((c) => c.comment_id === commentId);
+
+              if (!comment) {
+                Alert.alert('오류', '답변을 찾을 수 없습니다.');
+                return;
+              }
+
+              await answerConsultationMutation.mutateAsync({
+                postId: consultation.post_id,
+                content: comment.content,
+                commentId: commentId,
+              });
+              Alert.alert('알림', '답변이 확정되었습니다.');
+            } catch (error) {
+              console.error('Error confirming answer:', error);
+              Alert.alert('오류', '답변 확정에 실패했습니다.');
+            }
+          },
+        },
+      ]
+    );
   };
 
   return (
@@ -156,9 +197,9 @@ export default function ConsultationDetailScreen() {
             : undefined,
         }}
       />
-      <ScrollView className="flex-1 bg-white">
+      <ScrollView className="flex-1 bg-white ">
         {/* 상담 작성자 정보 */}
-        <View className="border-b border-gray-200 p-4">
+        <View className="mb-10 border-b border-gray-200 p-4">
           <View className="flex-row items-center justify-between">
             <View className="flex-row items-center">
               <Image
@@ -181,7 +222,9 @@ export default function ConsultationDetailScreen() {
           <View className="mb-4 flex-row items-center justify-between">
             <Text className="text-2xl font-bold">{consultation.post_content.title}</Text>
             <View
-              className={`rounded-full px-4 py-2 ${getStatusColor(consultation.post_content.status)}`}>
+              className={`rounded-full px-4 py-2 ${getStatusColor(
+                consultation.post_content.status as ConsultationStatus
+              )}`}>
               <Text className="font-medium">{getStatusText(consultation.post_content.status)}</Text>
             </View>
           </View>
@@ -256,25 +299,35 @@ export default function ConsultationDetailScreen() {
             setEditingCommentId(commentId);
             setEditingCommentContent(content);
           }}
+          onConfirm={handleConfirmAnswer}
+          status={consultation.post_content.status}
         />
+      </ScrollView>
+      {/* 댓글 작성 */}
+      {isTeacher && (
+        <View className="border-t border-gray-200 bg-white p-4">
+          <View className="mb-2">
+            <Text className="text-base font-bold">답변 작성</Text>
+          </View>
 
-        {/* 댓글 작성 */}
-        {isTeacher && (
-          <View className="border-t border-gray-200 p-4">
-            <TextInput
-              className="rounded-lg border border-gray-300 p-2"
-              placeholder="답변을 입력하세요"
-              value={newComment}
-              onChangeText={setNewComment}
-            />
+          <TextInput
+            className="mb-3 rounded-lg border border-gray-300 p-2"
+            placeholder="답변을 입력하세요"
+            value={newComment}
+            onChangeText={setNewComment}
+            multiline
+            numberOfLines={4}
+          />
+
+          <View className="flex-row justify-between">
             <TouchableOpacity
               onPress={handleCommentSubmit}
-              className="mt-2 rounded bg-purple-500 p-2">
-              <Text className="text-center text-white">답변 작성</Text>
+              className="mr-2 flex-1 rounded-lg bg-purple-500 p-3">
+              <Text className="text-center font-medium text-white">답변 작성</Text>
             </TouchableOpacity>
           </View>
-        )}
-      </ScrollView>
+        </View>
+      )}
 
       {/* 댓글 수정 모달 */}
       <EditCommentModal

@@ -129,6 +129,9 @@ export const getPostByIdApi = async (id: number) => {
 
 // 새로운 타입 정의
 export interface Topic {
+  topic_id: number;
+  title: ReactNode;
+  category: any;
   id: number;
   name: string;
   categories?: Category[];

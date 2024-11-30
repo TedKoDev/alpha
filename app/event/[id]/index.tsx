@@ -143,8 +143,8 @@ export default function EventPage() {
                 <View className="px-4">
                   <CommentSection
                     postId={post.post_id}
-                    comments={post.comments}
-                    comment_count={post.comment_count}
+                    postType={post.type}
+                    post_user_id={post.user_id}
                   />
                 </View>
                 {/* <View className="h-20" /> */}

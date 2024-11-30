@@ -1,8 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
-import { Topic, Category } from '~/types'; // 필요한 타입을 import 해주세요
+
 import GrayLine from '../grayline';
+
+import { Topic } from '~/services/postService';
 
 interface FilterHeaderProps {
   selectedTopicId: number | undefined;
@@ -14,6 +16,8 @@ interface FilterHeaderProps {
   setSelectedTopicId: (id: number | undefined) => void;
   setSelectedCategoryId: (id: number | undefined) => void;
   setShowSortModal: (show: boolean) => void;
+  showQuestionsOnly: boolean;
+  setShowQuestionsOnly: (show: boolean) => void;
 }
 
 export const FilterHeader: React.FC<FilterHeaderProps> = ({
@@ -26,12 +30,14 @@ export const FilterHeader: React.FC<FilterHeaderProps> = ({
   setSelectedTopicId,
   setSelectedCategoryId,
   setShowSortModal,
+  showQuestionsOnly,
+  setShowQuestionsOnly,
 }) => (
   <View className="bg-white">
     <View className="bg-white py-4">
       {/* Topics */}
       <View className="">
-        <Text className="mb-2 pl-4  text-gray-600">토픽</Text>
+        <Text className="mb-2 pl-4 text-gray-600">토픽</Text>
         <ScrollView className="pl-4" horizontal showsHorizontalScrollIndicator={false}>
           <View className="flex-row gap-2">
             <TouchableOpacity
@@ -46,22 +52,25 @@ export const FilterHeader: React.FC<FilterHeaderProps> = ({
                 전체
               </Text>
             </TouchableOpacity>
-            {topicsData?.map((topic) => (
-              <TouchableOpacity
-                key={topic.topic_id}
-                onPress={() => {
-                  setSelectedTopicId(topic.topic_id);
-                  setSelectedCategoryId(undefined);
-                }}
-                className={`rounded-full px-4 py-2 ${
-                  selectedTopicId === topic.topic_id ? 'bg-purple-500' : 'bg-gray-200'
-                }`}>
-                <Text
-                  className={selectedTopicId === topic.topic_id ? 'text-white' : 'text-gray-700'}>
-                  {topic.title}
-                </Text>
-              </TouchableOpacity>
-            ))}
+            {topicsData?.map((topic) => {
+              if (topic.topic_id === 1) return null; // topic_id가 1인 경우 생략
+              return (
+                <TouchableOpacity
+                  key={topic.topic_id}
+                  onPress={() => {
+                    setSelectedTopicId(topic.topic_id);
+                    setSelectedCategoryId(undefined);
+                  }}
+                  className={`rounded-full px-4 py-2 ${
+                    selectedTopicId === topic.topic_id ? 'bg-purple-500' : 'bg-gray-200'
+                  }`}>
+                  <Text
+                    className={selectedTopicId === topic.topic_id ? 'text-white' : 'text-gray-700'}>
+                    {topic.title}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
         </ScrollView>
       </View>
@@ -102,16 +111,29 @@ export const FilterHeader: React.FC<FilterHeaderProps> = ({
       )}
     </View>
 
-    {/* Sort Options Button Only */}
-    <View className=" flex-row justify-end">
-      <View className="mx-4">
-        <TouchableOpacity
-          onPress={() => setShowSortModal(!showSortModal)}
-          className="flex-row items-center justify-between rounded-lg border border-gray-200 px-4 py-2">
-          <Text className="text-gray-700">{selectedSortLabel}</Text>
-          <Ionicons name="chevron-down" size={20} color="#666" />
-        </TouchableOpacity>
-      </View>
+    {/* Filter Options */}
+    <View className="flex-row items-center justify-between px-4 py-2">
+      {/* Questions Only Toggle */}
+      <TouchableOpacity
+        onPress={() => setShowQuestionsOnly(!showQuestionsOnly)}
+        className="flex-row items-center">
+        <Ionicons
+          name="help-circle-outline"
+          size={20}
+          color={showQuestionsOnly ? '#9333ea' : '#666'}
+        />
+        <Text className="ml-2 text-gray-700">
+          {showQuestionsOnly ? '전체 보기' : '질문만 보기'}
+        </Text>
+      </TouchableOpacity>
+
+      {/* Sort Options Button */}
+      <TouchableOpacity
+        onPress={() => setShowSortModal(!showSortModal)}
+        className="flex-row items-center justify-between rounded-lg border border-gray-200 px-4 py-2">
+        <Text className="text-gray-700">{selectedSortLabel}</Text>
+        <Ionicons name="chevron-down" size={20} color="#666" />
+      </TouchableOpacity>
     </View>
     <GrayLine thickness={1} marginTop={10} />
   </View>
