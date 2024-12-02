@@ -112,7 +112,17 @@ export const commentService = {
 
   selectAsAnswer: async (commentId: number) => {
     try {
-      const response = await axios.patch(`/api/comments/${commentId}/select-as-answer`);
+      const token = useAuthStore.getState().userToken;
+      if (!token) {
+        throw new Error('No token found');
+      }
+      const response = await api.patch(
+        `/comments/${commentId}/select-as-answer`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       return response.data;
     } catch (error) {
       throw error;

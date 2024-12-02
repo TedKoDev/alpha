@@ -151,10 +151,7 @@ export const useSelectAnswer = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (commentId: number) => {
-      const response = await axios.patch(`/api/comments/${commentId}/select-as-answer`);
-      return response.data;
-    },
+    mutationFn: commentService.selectAsAnswer,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['comments'] });
     },
