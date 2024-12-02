@@ -1,5 +1,4 @@
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
-import { format } from 'date-fns';
 import { Image } from 'expo-image';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
@@ -11,6 +10,8 @@ import {
   ActivityIndicator,
   Alert,
   TextInput,
+  FlatList,
+  Dimensions,
 } from 'react-native';
 
 import ConsultationCommentSection from './components/ConsultationCommentSection';
@@ -18,14 +19,13 @@ import EditCommentModal from '../event/[id]/components/EditCommentModal';
 
 import { useAnswerConsultation } from '~/queries/hooks/comments/useAnswerConsultation';
 import {
-  useComments,
   useCreateComment,
   useDeleteComment,
   useUpdateComment,
 } from '~/queries/hooks/comments/useComments';
 import { useConsultationById } from '~/queries/hooks/posts/useConsultations';
-import { queryClient } from '~/queries/queryClient';
-import { answerConsultationApi, commentService } from '~/services/commentService';
+import { useDeletePost } from '~/queries/hooks/posts/usePosts';
+import { commentService } from '~/services/commentService';
 import { useAuthStore } from '~/store/authStore';
 import { ConsultationStatus, getStatusColor, getStatusText } from '~/types/consultation';
 
@@ -46,9 +46,11 @@ export default function ConsultationDetailScreen() {
   const [newComment, setNewComment] = useState('');
   const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
   const [editingCommentContent, setEditingCommentContent] = useState('');
-
+  const [activeIndex, setActiveIndex] = useState(0);
+  const { width } = Dimensions.get('window');
+  const deletePost = useDeletePost();
   const isAuthor = userInfo?.user_id === consultation?.user_id;
-  const isTeacher = userInfo?.role === 'TEACHER';
+  const isTeacher = userInfo?.role === 'TEACHER' || userInfo?.role === 'ADMIN';
 
   if (isLoading) {
     return (
@@ -125,6 +127,7 @@ export default function ConsultationDetailScreen() {
         onPress: async () => {
           try {
             // 게시글 삭제 API 호출
+            await deletePost.mutateAsync(consultation.post_id);
             router.back();
           } catch (error) {
             Alert.alert('오류', '게시글 삭제에 실패했습니다.');
@@ -159,7 +162,7 @@ export default function ConsultationDetailScreen() {
               await answerConsultationMutation.mutateAsync({
                 postId: consultation.post_id,
                 content: comment.content,
-                commentId: commentId,
+                commentId,
               });
               Alert.alert('알림', '답변이 확정되었습니다.');
             } catch (error) {
@@ -170,6 +173,12 @@ export default function ConsultationDetailScreen() {
         },
       ]
     );
+  };
+
+  const handleScroll = (event: any) => {
+    const slideSize = event.nativeEvent.layoutMeasurement.width;
+    const index = event.nativeEvent.contentOffset.x / slideSize;
+    setActiveIndex(Math.round(index));
   };
 
   return (
@@ -249,20 +258,40 @@ export default function ConsultationDetailScreen() {
           </View>
 
           {/* 이미지가 있는 경우 이미지 표시 */}
-          {consultation.post_content.images && consultation.post_content.images.length > 0 && (
-            <View className="mt-4">
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                {consultation.post_content.images.map((image, index) => (
-                  <Image
-                    key={index}
-                    source={{ uri: image.url }}
-                    className="mr-2 h-40 w-40 rounded-lg"
-                    contentFit="cover"
-                  />
-                ))}
-              </ScrollView>
-            </View>
-          )}
+          {consultation.media &&
+            consultation.media.filter((m) => !m.deleted_at && m.media_type === 'IMAGE').length >
+              0 && (
+              <View>
+                <FlatList
+                  data={consultation.media.filter((m) => !m.deleted_at && m.media_type === 'IMAGE')}
+                  horizontal
+                  pagingEnabled
+                  showsHorizontalScrollIndicator={false}
+                  onScroll={handleScroll}
+                  renderItem={({ item }) => (
+                    <Image
+                      contentFit="cover"
+                      source={{ uri: item.media_url }}
+                      style={{ width, height: 300 }}
+                      className="mb-4 rounded-lg"
+                    />
+                  )}
+                  keyExtractor={(item) => item.media_id.toString()}
+                />
+                <View className="mt-2 flex-row justify-center">
+                  {consultation.media
+                    .filter((m) => !m.deleted_at && m.media_type === 'IMAGE')
+                    .map((_: any, index: any) => (
+                      <View
+                        key={index}
+                        className={`mx-1 h-2 w-2 rounded-full ${
+                          index === activeIndex ? 'bg-purple-500' : 'bg-gray-300'
+                        }`}
+                      />
+                    ))}
+                </View>
+              </View>
+            )}
         </View>
 
         {/* 선생님 정보 (있는 경우) */}

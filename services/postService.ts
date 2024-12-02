@@ -92,7 +92,7 @@ export const addPostApi = async (createPostDto: CreatePostDto) => {
 
     if (!token) {
     }
-    console.log('createPostDto', createPostDto);
+    console.log('add postpayload', createPostDto);
 
     const response = await api.post('/posts/', createPostDto, {
       headers: {

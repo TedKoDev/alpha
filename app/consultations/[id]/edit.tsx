@@ -9,7 +9,10 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
+  Image,
   ActivityIndicator,
+  Dimensions,
+  FlatList,
 } from 'react-native';
 
 import { useUserInfo } from '~/queries/hooks/auth/useUserinfo';
@@ -23,38 +26,49 @@ export default function EditConsultationScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { data: consultation, isLoading } = useConsultationById(Number(id));
+  const { width } = Dimensions.get('window');
+  const [activeIndex, setActiveIndex] = useState(0);
 
-  console.log('consultation', JSON.stringify(consultation, null, 2));
+  // 초기 상태 설정
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+  const [selectedImages, setSelectedImages] = useState<
+    { uri: string; type: string; media_id?: number }[]
+  >([]);
+
+  // consultation 데이터가 로드되면 초기값 설정
+  useEffect(() => {
+    if (consultation) {
+      // 제목과 내용 설정
+      setTitle(consultation.post_content.title || '');
+      setContent(consultation.post_content.content || '');
+
+      // 카테고리 설정
+      setSelectedCategory(consultation.category_id);
+
+      // 이미지 설정
+      if (consultation.media) {
+        const activeImages = consultation.media
+          .filter((m) => !m.deleted_at && m.media_type === 'IMAGE')
+          .map((media) => ({
+            uri: media.media_url,
+            type: 'image/jpeg',
+            media_id: media.media_id,
+          }));
+        setSelectedImages(activeImages);
+      }
+    }
+  }, [consultation]);
 
   const updatePost = useUpdatePost();
   const { data: topics = [] } = useTopics();
 
   const { data: userInfo } = useUserInfo();
 
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
-
   const [isImageLoading, setIsImageLoading] = useState(false);
-  const [selectedImages, setSelectedImages] = useState<{ uri: string; type: string }[]>([]);
 
   const MAX_IMAGES = 5;
-
-  useEffect(() => {
-    if (consultation) {
-      setTitle(consultation.post_content.title);
-      setContent(consultation.post_content.content);
-      setSelectedCategory(consultation.category_id);
-      if (consultation.post_content.images) {
-        setSelectedImages(
-          consultation.post_content.images.map((image) => ({
-            uri: image.url,
-            type: 'image/jpeg',
-          }))
-        );
-      }
-    }
-  }, [consultation]);
 
   const consultationCategories = topics.find((topic) => topic.topic_id === 1)?.category || [];
 
@@ -99,28 +113,54 @@ export default function EditConsultationScreen() {
     }
 
     try {
-      // 이미지 업로드 처리
-      const uploadedImages = [];
-      for (const image of selectedImages) {
-        if (!image.uri.startsWith('http')) {
-          const presignedData = await getPresignedUrlApi(image.type);
-          await uploadFileToS3(presignedData.presigned_url, image.uri, image.type);
-          uploadedImages.push({ url: presignedData.image_url });
-        } else {
-          uploadedImages.push({ url: image.uri });
-        }
-      }
+      setIsImageLoading(true);
 
-      await updatePost.mutateAsync({
+      // 새로운 이미지와 기존 이미지 구분
+      const newImages = selectedImages.filter((image) => !image.media_id);
+      const existingImages = selectedImages.filter((image) => image.media_id);
+
+      // 새 이미지 업로드
+      const uploadedUrls = await Promise.all(
+        newImages.map(async (image) => {
+          const extension = image.uri.split('.').pop();
+          const fileName = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${extension}`;
+          const { url } = await getPresignedUrlApi(fileName, image.type);
+          const response = await fetch(image.uri);
+          const blob = await response.blob();
+          await uploadFileToS3(url, blob);
+          return url.split('?')[0];
+        })
+      );
+
+      // 업데이트 데이터 구성
+      const updateData = {
         postId: Number(id),
         title: title.trim(),
         content: content.trim(),
         categoryId: selectedCategory!,
-        images: uploadedImages,
-      });
+        points: selectedCategoryPrice,
+        media: [
+          ...existingImages.map((image) => ({
+            media_id: image.media_id,
+            mediaUrl: image.uri,
+            mediaType: 'IMAGE',
+          })),
+          ...uploadedUrls.map((url) => ({
+            mediaUrl: url,
+            mediaType: 'IMAGE',
+          })),
+        ],
+      };
+
+      console.log('updateData', JSON.stringify(updateData, null, 2));
+
+      await updatePost.mutateAsync(updateData);
       router.back();
     } catch (error) {
+      console.error('수정 실패:', error);
       Alert.alert('오류', '수정에 실패했습니다.');
+    } finally {
+      setIsImageLoading(false);
     }
   };
 
@@ -130,6 +170,12 @@ export default function EditConsultationScreen() {
 
   // 포인트가 충분한지 확인
   const hasEnoughPoints = (userInfo?.points || 0) >= selectedCategoryPrice;
+
+  const handleScroll = (event: any) => {
+    const slideSize = event.nativeEvent.layoutMeasurement.width;
+    const index = event.nativeEvent.contentOffset.x / slideSize;
+    setActiveIndex(Math.round(index));
+  };
 
   if (isLoading) {
     return (
@@ -154,7 +200,7 @@ export default function EditConsultationScreen() {
       />
 
       <ScrollView className="flex-1 bg-white p-4">
-        {/* 카테고리 ��택 */}
+        {/* 카테고리 택 */}
         <View className="mb-4">
           <View className="mb-2 flex-row items-center justify-between">
             <Text className="text-base font-bold">상담 유형</Text>
@@ -242,7 +288,7 @@ export default function EditConsultationScreen() {
           onChangeText={setContent}
         />
 
-        {/* 이미지 첨부 */}
+        {/* 이미지 섹션 */}
         <View className="mb-4">
           <View className="flex-row items-center justify-between">
             <TouchableOpacity
@@ -269,8 +315,7 @@ export default function EditConsultationScreen() {
                   <Image
                     source={{ uri: image.uri }}
                     className="h-20 w-20 rounded-lg"
-                    onLoadStart={() => setIsImageLoading(true)}
-                    onLoadEnd={() => setIsImageLoading(false)}
+                    contentFit="cover"
                   />
                   <TouchableOpacity
                     className="absolute right-1 top-1 rounded-full bg-black/50 p-1"
@@ -294,6 +339,9 @@ export default function EditConsultationScreen() {
             {updatePost.isPending ? '수정 중...' : '수정하기'}
           </Text>
         </TouchableOpacity>
+
+        {/* Bottom Padding */}
+        <View className="h-10" />
       </ScrollView>
     </>
   );
